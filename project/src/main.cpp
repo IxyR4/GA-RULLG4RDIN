@@ -15,9 +15,10 @@
 
 #include "SPIFFS.h" // For file system (separate HTML file)
 
-/*Put your SSID & Password*/
-const char* ssid = "TP-Link Deco";  // Enter SSID here
-const char* password = "19201920";  //Enter Password here
+/*Network credentials are stored in network_credentials.h, enter them there*/
+#include "network_credentials.h"
+const char* ssid = WIFI_SSID;  
+const char* password = WIFI_PASSWORD;  
 
 WebServer server(80);
 
