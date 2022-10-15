@@ -4,7 +4,7 @@
 <head>
     <title>Smart Home</title>
     <link rel="stylesheet" href="style.css" />
-    <link href='https://fonts.googleapis.com/css?family=Nunito Sans' rel='stylesheet'>
+    <link href='https://fonts.googleapis.com/css?family=Muli' rel='stylesheet'>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <script>
         var w = window.innerWidth;
@@ -17,21 +17,23 @@
         }
 
         body {
-            background-color: #FAF9F6   ;
+            background-color: #f0f0f0   ;
             width: 100%;
             height: 100vh;
             display: flex;
-            font-family: 'Nunito Sans';
+            font-family: 'Muli';
             font-size: 22px;
         }
     
         input[type="range"] {
             /* To remove default styles appplied by webkit browsers */
             -webkit-appearance: none;
-            width: 420px;
+            width: 410px;
+            margin-left: 5px;
+            margin-right: 5px;
             position: absolute;
             top: calc(50% + 50px);
-            background: #FAF9F6;
+            background: #f0f0f0;
             left: 50%;
             transform: translateX(-50%);
             border-radius: 9999px;
@@ -49,29 +51,37 @@
             /* Webkit based browsers (chrome, opera, ...) */
             input[type="range"]::-webkit-slider-thumb {
                 /* Removes the default styling */
-                -webkit-appearance: none;
-                width: 20px;
-                height: 20px;
-                margin: .2em 0;
+                appearance: none;
+                border: none;
+                width: 15%;
+                height: 40px;
+                margin: 0 -20px;
                 background: #FAF9F6;
-                border-radius: 100%;
+                border-radius: 9999px;
+                border: transparent 0 none;
+                /* padding: 2px 2px; */
+                outline: solid 0 transparent;
                 /* The inset shadow gives depth and makes the thumb look 3 dimensional and the other one shows a subtle effect of the shadow it creates because of the light source coming from the top left of the page */
-                box-shadow: inset .4em .4em 5px -8px rgba(255, 255, 255, .5), inset -.4em -.4em 10px -3px rgba(0,0,0,.2), 0.7em 0.5em 7px -0.5em rgba(0,0,0,.4), -1px -1px 2px rgba(255, 255, 255, 0.8), 1px 1px 2px rgba(0, 0, 0, 0.9);
+                box-shadow: inset .4em .4em 5px -8px rgba(255, 255, 255, .5), inset -.4em -.4em 10px -3px #b1b1b1, 0.7em 0.5em 7px -0.5em #b1b1b1, -1px -1px 2px rgba(255, 255, 255, 0.8), 1px 1px 2px #b1b1b1;
                 transition: all;
                 transition-duration: 250ms;
                 cursor: pointer;
             }
 
-        /*All the same stuff for firefox */
+        /*All the same stuff for Firefox */
         input[type=range]::-moz-range-thumb {
-            -webkit-appearance: none;
-            width: 20px;
-            height: 20px;
-            margin: .2em 0;
+            appearance: none;
+            border: none;
+            width: 15%;
+            height: 40px;
+            margin-left: 10px;
             background: #FAF9F6;
-            border-radius: 100%;
+            border-radius: 9999px;
+            border: transparent 0 none;
+            /* padding: 2px 2px; */
+            outline: solid 0 transparent;
             /* The inset shadow gives depth and makes the thumb look 3 dimensional and the other one shows a subtle effect of the shadow it creates because of the light source coming from the top left of the page */
-            box-shadow: inset .4em .4em 5px -8px rgba(255, 255, 255, .5), inset -.4em -.4em 10px -3px rgba(0,0,0,.2), 0.7em 0.5em 7px -0.5em rgba(0,0,0,.4), -1px -1px 2px rgba(255, 255, 255, 0.8), 1px 1px 2px rgba(0, 0, 0, 0.9);
+            box-shadow: inset .4em .4em 5px -8px rgba(255, 255, 255, .5), inset -.4em -.4em 10px -3px #b1b1b1, 0.7em 0.5em 7px -0.5em #b1b1b1, -1px -1px 2px rgba(255, 255, 255, 0.8), 1px 1px 2px #b1b1b1;
             transition: all;
             transition-duration: 250ms;
             cursor: pointer;
@@ -81,32 +91,32 @@
         /* RUNNABLE TRACK -> represented by the indented carve in which the ball (thumb) moves */
         /* Webkit browsers */
         input[type="range"]::-webkit-slider-runnable-track {
-            background: transparent;
+            background: none;
             width: 100%;
-            height: 30px;
+            height: 50px;
             padding: 0 3px;
             border-radius: 2em;
             transition: all;
             transition-duration: 250ms;
-            border: 2px solid #FAF9F6;
+            border: 2px none #FAF9F6;
             /* These shadow are what create the skeumorphic indent on the track. The first one is dark to show places in the indent that light don't reach and the second one shows places where light meets thereby creating the illusion of depth */
-            box-shadow: -5px -5px 8px rgba(255, 255, 255, 0.6), 5px 5px 10px rgba(0, 0, 0, 0.4), inset 2px -2px 5px rgba(255, 255, 255, 1), inset 2px 2px 4px rgba(0, 0, 0, 0.3);
+            box-shadow: -5px -5px 8px rgba(255, 255, 255, 1), 5px 5px 10px #b1b1b1, inset 2px -2px 5px rgba(255, 255, 255, 0), inset 2px 2px 4px rgba(0, 0, 0, 0);
         }
-        /* For firefox */
+        /* For Firefox */
         input[type=range]::-moz-range-track {
-            background: transparent;
+            background: none;
             width: 100%;
-            height: 30px;
+            height: 50px;
             padding: 0 3px;
             border-radius: 2em;
             transition: all;
             transition-duration: 250ms;
-            border: 2px solid #FAF9F6;
+            border: 2px none #FAF9F6;
             /* These shadow are what create the skeumorphic indent on the track. The first one is dark to show places in the indent that light don't reach and the second one shows places where light meets thereby creating the illusion of depth */
-            box-shadow: -5px -5px 8px rgba(255, 255, 255, 0.6), 5px 5px 10px rgba(0, 0, 0, 0.4), inset 2px -2px 5px rgba(255, 255, 255, 1), inset 2px 2px 4px rgba(0, 0, 0, 0.3);
+            box-shadow: -5px -5px 8px rgba(255, 255, 255, 1), 5px 5px 10px #b1b1b1, inset 2px -2px 5px rgba(255, 255, 255, 0), inset 2px 2px 4px rgba(0, 0, 0, 0);
         }
 
-        input[type="range"]::-webkit-slider-thumb:hover {
+        /* input[type="range"]::-webkit-slider-thumb:hover {
             box-shadow: inset .4em .4em 5px -8px rgba(255, 255, 255, .5), inset -.4em -.4em 10px -3px rgba(0,0,0,.2), 0.7em 0.5em 7px -0.5em rgba(0,0,0,.4), -1px -1px 4px rgba(255, 255, 255, 0.6), 1px 1px 4px rgba(0, 0, 0, 0.8);
         }
 
@@ -116,19 +126,19 @@
 
         input[type="range"]::-webkit-slider-runnable-track:hover {
             box-shadow: -5px -5px 8px rgba(255, 255, 255, 0.6), 5px 5px 10px rgba(0, 0, 0, 0.4), inset 2px -2px 5px rgba(255, 255, 255, 1), inset 2px 2px 4px rgba(0, 0, 0, 0.3);
-        }
+        } */
     
 
 
         /*Button Classification*/
         button {
-            background: #FAF9F6;
-            color: #1c1c1c;
+            background: #f0f0f0;
+            color: #001f3f;
             border-radius: 9999px;
-            box-shadow: -5px -5px 8px rgba(255, 255, 255, 0.6), 5px 5px 10px rgba(0, 0, 0, 0.4), inset 2px -2px 5px rgba(255, 255, 255, 1), inset 2px 2px 4px rgba(0, 0, 0, 0.3);
-            text-shadow: .5px .5px 0.9px rgba(0,0,0, .4);
+            box-shadow: -5px -5px 8px rgba(255, 255, 255, 1), 5px 5px 10px #b1b1b1;
+            /* text-shadow: .5px .5px 0.9px rgba(0,0,0, .4); */
             position: absolute;
-            border: 2px solid #FAF9F6;
+            border: 0px solid #FAF9F6;
             cursor: pointer;
             transition: all;
             transition-duration: 250ms;
@@ -142,11 +152,13 @@
             transform: translateX(-105%);
         }
         button:hover {
-                box-shadow: -2px -2px 6px rgba(255, 255, 255, 0.4), 2px 2px 6px rgba(0, 0, 0, 0.5), inset 2px -2px 5px rgba(255, 255, 255, 1), inset 2px 2px 4px rgba(0, 0, 0, 0.3);
+                /* box-shadow: -2px -2px 6px rgba(255, 255, 255, 0.4), 2px 2px 6px rgba(0, 0, 0, 0.5), inset 2px -2px 5px rgba(255, 255, 255, 1), inset 2px 2px 4px rgba(0, 0, 0, 0.3); */
+                box-shadow: -8px -8px 8px rgba(255, 255, 255, 1), 8px 8px 10px #b1b1b1;
             }
         
             button:active {
-                box-shadow: -1px -1px 4px rgba(255, 255, 255, 0.7), 1px 1px 4px rgba(0, 0, 0, 0.8), inset 2px -2px 5px rgba(255, 255, 255, 1), inset 2px 2px 4px rgba(0, 0, 0, 0.3);
+                box-shadow: -1px -1px 4px rgba(255, 255, 255, 0), 1px 1px 4px rgba(0, 0, 0, 0), inset 2px -2px 5px rgba(255, 255, 255, 1), inset 2px 2px 4px rgba(0, 0, 0, 0.3);
+                padding-top: 2px;
             }
 
         /*Up Button*/
@@ -168,16 +180,16 @@
             text;
             align-items: center;
             justify-content: center;
-            background: #FAF9F6;
-            color: #1c1c1c;
+            background: #f0f0f0;
+            color: #001f3f;
             border-radius: 9999px;
-            box-shadow: -5px -5px 8px rgba(255, 255, 255, 0.6), 5px 5px 10px rgba(0, 0, 0, 0.4), inset 2px -2px 5px rgba(255, 255, 255, 1), inset 2px 2px 4px rgba(0, 0, 0, 0.3);
-            text-shadow: .5px .5px 0.9px rgba(0,0,0, .4);
+            box-shadow: -5px -5px 8px rgba(255, 255, 255, 1), 5px 5px 10px #b1b1b1;
+            /* text-shadow: .5px .5px 0.9px rgba(0,0,0, .4); */
             position: absolute;
             top: calc(50% + 100px);
             left: 50%;
             transform: translateX(-50%);
-            border: 2px solid #FAF9F6;
+            /* border: 2px solid #FAF9F6; */
             cursor: pointer;
             height: 50px;
             width: 100px;
@@ -199,14 +211,14 @@
 </head>
 <body>
     <main>
-        <input type="range" value="50" min="1" max="100" oninput="this.nextElementSibling.value = this.value">
+        <input type="range" value="50" min="0" max="100" oninput="this.nextElementSibling.value = this.value">
         <output class="value-box">50</output>
     </main>
-    <button class="up-btn">
-        <span>Up</span>
-    </button>
     <button class="down-btn">
         <span>Down</span>
+    </button>
+    <button class="up-btn">
+        <span>Up</span>
     </button>
     <button class="auto-btn">
         <span>Auto</span>
