@@ -15,9 +15,26 @@
             padding: 0;
             margin: 0;
         }
+        
+        /* Variables, they do exist */
+        :root {
+            --outdent-shadow: -5px -5px 8px rgba(255, 255, 255, 1), 5px 5px 8px rgba(0, 0, 0, 0.3), inset 2px 2px 0px rgba(255, 255, 255, 0), inset -2px -2px 0px rgba(0, 0, 0, 0);
+            --outdent-hover-shadow: -8px -8px 8px rgba(255, 255, 255, 1), 8px 8px 10px rgba(0, 0, 0, 0.3);
+            --outdent-active-shadow: -1px -1px 4px rgba(255, 255, 255, 0), 1px 1px 4px rgba(0, 0, 0, 0), inset -2px -2px 5px rgba(255, 255, 255, 1), inset 2px 2px 4px rgba(0, 0, 0, 0.3);
+            --indent-shadow: 1px 1px 4px rgba(255, 255, 255, 0), -1px -1px 4px rgba(0, 0, 0, 0), inset -4px -4px 4px rgba(255, 255, 255, 1), inset 4px 4px 4px rgba(0, 0, 0, 0.3);
+            /* Round thumb: */
+            /* --slider-thumb-shadow: inset .4em .4em 5px -8px rgba(255, 255, 255, .5), inset -.4em -.4em 10px -3px rgba(0, 0, 0, 0.3), 0.7em 0.5em 7px -0.5em rgba(0, 0, 0, 0.3), -1px -1px 2px rgba(255, 255, 255, 0.8), 1px 1px 2px rgba(0, 0, 0, 0.3); */
+            /* Flat thumb: */
+            --slider-thumb-shadow: -2px -2px 8px rgba(255, 255, 255, 0.5), 2px 2px 4px rgba(0, 0, 0, 0.4), inset 2px 2px 0px rgba(255, 255, 255, 0), inset -2px -2px 0px rgba(0, 0, 0, 0);
+            
+            --background_color: #F0F0F0;
+
+            --transition-duration: 250ms;
+        }
+
 
         body {
-            background-color: #f0f0f0   ;
+            background-color: var(--background_color);
             width: 100%;
             height: 100vh;
             display: flex;
@@ -27,46 +44,54 @@
     
         input[type="range"] {
             /* To remove default styles appplied by webkit browsers */
-            -webkit-appearance: none;
-            width: 410px;
-            margin-left: 5px;
-            margin-right: 5px;
+            appearance: none;
+            width: 420px;
             position: absolute;
-            top: calc(50% + 50px);
-            background: #f0f0f0;
+            top: calc(50% + 40px);
+            background: var(--background_color);
             left: 50%;
             transform: translateX(-50%);
             border-radius: 9999px;
             justify-content: center;
             align-items: center;
 
+            /* background: none; */
+            /* width: 100%; */
+            height: 50px;
+            /* padding: 0 3px; */
+            /* border-radius: 2em; */
+            transition: all;
+            transition-duration: var(--transition-duration);
+            /* border: 2px none var(--background_color); */
+            /* These shadow are what create the skeumorphic indent on the track. The first one is dark to show places in the indent that light don't reach and the second one shows places where light meets thereby creating the illusion of depth */
+            box-shadow: var(--indent-shadow);
         }
 
-            input[type="range"]:focus {
-                /* To remove default (mostly blue) outline appplied by browsers on :focus */
-                outline: 0;
-            }
+        input[type="range"]:focus {
+            /* To remove default (mostly blue) outline appplied by browsers on :focus */
+            outline: 0;
+        }
 
-            /* SLIDER THUMB -> represented by the orange ball in the design */
-            /* Webkit based browsers (chrome, opera, ...) */
-            input[type="range"]::-webkit-slider-thumb {
-                /* Removes the default styling */
-                appearance: none;
-                border: none;
-                width: 15%;
-                height: 40px;
-                margin: 0 -20px;
-                background: #FAF9F6;
-                border-radius: 9999px;
-                border: transparent 0 none;
-                /* padding: 2px 2px; */
-                outline: solid 0 transparent;
-                /* The inset shadow gives depth and makes the thumb look 3 dimensional and the other one shows a subtle effect of the shadow it creates because of the light source coming from the top left of the page */
-                box-shadow: inset .4em .4em 5px -8px rgba(255, 255, 255, .5), inset -.4em -.4em 10px -3px #b1b1b1, 0.7em 0.5em 7px -0.5em #b1b1b1, -1px -1px 2px rgba(255, 255, 255, 0.8), 1px 1px 2px #b1b1b1;
-                transition: all;
-                transition-duration: 250ms;
-                cursor: pointer;
-            }
+        /* SLIDER THUMB -> represented by the orange ball in the design */
+        /* Webkit based browsers (chrome, opera, ...) */
+        input[type="range"]::-webkit-slider-thumb {
+            /* Removes the default styling */
+            appearance: none;
+            border: none;
+            width: 15%;
+            height: 40px;
+            /* margin: 0 -20px; */
+            background: var(--background_color);
+            border-radius: 9999px;
+            border: transparent 0 none;
+            /* padding: 2px 2px; */
+            outline: solid 0 transparent;
+            /* The inset shadow gives depth and makes the thumb look 3 dimensional and the other one shows a subtle effect of the shadow it creates because of the light source coming from the top left of the page */
+            box-shadow: var(--slider-thumb-shadow);
+            transition: all;
+            transition-duration: var(--transition-duration);
+            cursor: pointer;
+        }
 
         /*All the same stuff for Firefox */
         input[type=range]::-moz-range-thumb {
@@ -74,46 +99,17 @@
             border: none;
             width: 15%;
             height: 40px;
-            margin-left: 10px;
-            background: #FAF9F6;
+            /* margin-left: 10px; */
+            background: var(--background_color);
             border-radius: 9999px;
             border: transparent 0 none;
             /* padding: 2px 2px; */
             outline: solid 0 transparent;
             /* The inset shadow gives depth and makes the thumb look 3 dimensional and the other one shows a subtle effect of the shadow it creates because of the light source coming from the top left of the page */
-            box-shadow: inset .4em .4em 5px -8px rgba(255, 255, 255, .5), inset -.4em -.4em 10px -3px #b1b1b1, 0.7em 0.5em 7px -0.5em #b1b1b1, -1px -1px 2px rgba(255, 255, 255, 0.8), 1px 1px 2px #b1b1b1;
+            box-shadow: var(--slider-thumb-shadow);
             transition: all;
-            transition-duration: 250ms;
+            transition-duration: var(--transition-duration);
             cursor: pointer;
-        }
-
-
-        /* RUNNABLE TRACK -> represented by the indented carve in which the ball (thumb) moves */
-        /* Webkit browsers */
-        input[type="range"]::-webkit-slider-runnable-track {
-            background: none;
-            width: 100%;
-            height: 50px;
-            padding: 0 3px;
-            border-radius: 2em;
-            transition: all;
-            transition-duration: 250ms;
-            border: 2px none #FAF9F6;
-            /* These shadow are what create the skeumorphic indent on the track. The first one is dark to show places in the indent that light don't reach and the second one shows places where light meets thereby creating the illusion of depth */
-            box-shadow: -5px -5px 8px rgba(255, 255, 255, 1), 5px 5px 10px #b1b1b1, inset 2px -2px 5px rgba(255, 255, 255, 0), inset 2px 2px 4px rgba(0, 0, 0, 0);
-        }
-        /* For Firefox */
-        input[type=range]::-moz-range-track {
-            background: none;
-            width: 100%;
-            height: 50px;
-            padding: 0 3px;
-            border-radius: 2em;
-            transition: all;
-            transition-duration: 250ms;
-            border: 2px none #FAF9F6;
-            /* These shadow are what create the skeumorphic indent on the track. The first one is dark to show places in the indent that light don't reach and the second one shows places where light meets thereby creating the illusion of depth */
-            box-shadow: -5px -5px 8px rgba(255, 255, 255, 1), 5px 5px 10px #b1b1b1, inset 2px -2px 5px rgba(255, 255, 255, 0), inset 2px 2px 4px rgba(0, 0, 0, 0);
         }
 
         /* input[type="range"]::-webkit-slider-thumb:hover {
@@ -132,16 +128,16 @@
 
         /*Button Classification*/
         button {
-            background: #f0f0f0;
+            background: var(--background_color);
             color: #001f3f;
             border-radius: 9999px;
-            box-shadow: -5px -5px 8px rgba(255, 255, 255, 1), 5px 5px 10px #b1b1b1;
+            box-shadow: var(--outdent-shadow); /*-5px -5px 8px rgba(255, 255, 255, 1), 5px 5px 8px rgba(0, 0, 0, 0.3), inset 2px 2px 2px rgba(255, 255, 255, 1), inset -2px -2px 2px rgba(0, 0, 0, 0.3);
             /* text-shadow: .5px .5px 0.9px rgba(0,0,0, .4); */
             position: absolute;
-            border: 0px solid #FAF9F6;
+            border: 0px solid var(--background_color);
             cursor: pointer;
             transition: all;
-            transition-duration: 250ms;
+            transition-duration: var(--transition-duration);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -153,11 +149,11 @@
         }
         button:hover {
                 /* box-shadow: -2px -2px 6px rgba(255, 255, 255, 0.4), 2px 2px 6px rgba(0, 0, 0, 0.5), inset 2px -2px 5px rgba(255, 255, 255, 1), inset 2px 2px 4px rgba(0, 0, 0, 0.3); */
-                box-shadow: -8px -8px 8px rgba(255, 255, 255, 1), 8px 8px 10px #b1b1b1;
+                box-shadow: var(--outdent-hover-shadow);
             }
         
             button:active {
-                box-shadow: -1px -1px 4px rgba(255, 255, 255, 0), 1px 1px 4px rgba(0, 0, 0, 0), inset 2px -2px 5px rgba(255, 255, 255, 1), inset 2px 2px 4px rgba(0, 0, 0, 0.3);
+                box-shadow: var(--outdent-active-shadow);
                 padding-top: 2px;
             }
 
@@ -180,21 +176,21 @@
             text;
             align-items: center;
             justify-content: center;
-            background: #f0f0f0;
+            background: var(--background_color);
             color: #001f3f;
             border-radius: 9999px;
-            box-shadow: -5px -5px 8px rgba(255, 255, 255, 1), 5px 5px 10px #b1b1b1;
+            box-shadow: var(--outdent-shadow);
             /* text-shadow: .5px .5px 0.9px rgba(0,0,0, .4); */
             position: absolute;
             top: calc(50% + 100px);
             left: 50%;
             transform: translateX(-50%);
-            /* border: 2px solid #FAF9F6; */
+            /* border: 2px solid var(--background_color); */
             cursor: pointer;
             height: 50px;
             width: 100px;
             transition: all;
-            transition-duration: 250ms;
+            transition-duration: var(--transition-duration);
             display: flex;
             font-size: 22px;
         }
