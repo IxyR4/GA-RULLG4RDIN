@@ -12,8 +12,11 @@
     </script>
     <style>
         * {
-            padding: 0;
-            margin: 0;
+            /* padding: 5px; */
+            /* margin: auto; */
+            height: 50px;
+            /* margin: 10px 5px; */
+            /* align-items: center; */
         }
         
         /* Variables, they do exist */
@@ -21,7 +24,7 @@
             --outdent-shadow: -5px -5px 8px rgba(255, 255, 255, 1), 5px 5px 8px rgba(0, 0, 0, 0.3), inset 2px 2px 0px rgba(255, 255, 255, 0), inset -2px -2px 0px rgba(0, 0, 0, 0);
             --outdent-hover-shadow: -8px -8px 8px rgba(255, 255, 255, 1), 8px 8px 10px rgba(0, 0, 0, 0.3);
             --outdent-active-shadow: -1px -1px 4px rgba(255, 255, 255, 0), 1px 1px 4px rgba(0, 0, 0, 0), inset -2px -2px 5px rgba(255, 255, 255, 1), inset 2px 2px 4px rgba(0, 0, 0, 0.3);
-            --indent-shadow: 1px 1px 4px rgba(255, 255, 255, 0), -1px -1px 4px rgba(0, 0, 0, 0), inset -4px -4px 4px rgba(255, 255, 255, 1), inset 4px 4px 4px rgba(0, 0, 0, 0.3);
+            --indent-shadow: 1px 1px 4px rgba(255, 255, 255, 0), -1px -1px 4px rgba(0, 0, 0, 0), inset -4px -4px 6px rgba(255, 255, 255, 1), inset 4px 4px 6px rgba(0, 0, 0, 0.3);
             /* Round thumb: */
             /* --slider-thumb-shadow: inset .4em .4em 5px -8px rgba(255, 255, 255, .5), inset -.4em -.4em 10px -3px rgba(0, 0, 0, 0.3), 0.7em 0.5em 7px -0.5em rgba(0, 0, 0, 0.3), -1px -1px 2px rgba(255, 255, 255, 0.8), 1px 1px 2px rgba(0, 0, 0, 0.3); */
             /* Flat thumb: */
@@ -35,29 +38,32 @@
 
         body {
             background-color: var(--background_color);
-            width: 100%;
-            height: 100vh;
-            display: flex;
+            /* width: 20%; */
+            /* height: 100vh; */
+            /* margin: 10px 10px; */
+            /* display: flex; */
             font-family: 'Muli';
             font-size: 22px;
+            /* padding: 10px; */
         }
     
         input[type="range"] {
             /* To remove default styles appplied by webkit browsers */
             appearance: none;
-            width: 420px;
-            position: absolute;
-            top: calc(50% + 40px);
+            width: 100%;
+            /* position: absolute;
+            top: calc(50% + 40px); */
             background: var(--background_color);
-            left: 50%;
-            transform: translateX(-50%);
+            /* left: 50%; */
+            /* transform: translateX(-50%); */
             border-radius: 9999px;
             justify-content: center;
-            align-items: center;
-
+            /* align-items: center; */
+            /* margin: 10px; */
+            /* box-sizing: border-box; */
             /* background: none; */
             /* width: 100%; */
-            height: 50px;
+            /* height: 50px; */
             /* padding: 0 3px; */
             /* border-radius: 2em; */
             transition: all;
@@ -131,21 +137,19 @@
             background: var(--background_color);
             color: #001f3f;
             border-radius: 9999px;
-            box-shadow: var(--outdent-shadow); /*-5px -5px 8px rgba(255, 255, 255, 1), 5px 5px 8px rgba(0, 0, 0, 0.3), inset 2px 2px 2px rgba(255, 255, 255, 1), inset -2px -2px 2px rgba(0, 0, 0, 0.3);
+            box-shadow: var(--outdent-shadow); 
             /* text-shadow: .5px .5px 0.9px rgba(0,0,0, .4); */
-            position: absolute;
+            /* position: absolute; */
             border: 0px solid var(--background_color);
-            cursor: pointer;
+            /* cursor: pointer; */
             transition: all;
             transition-duration: var(--transition-duration);
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            /* display: flex; */
+            /* align-items: center; */
+            /* justify-content: center; */
             font-size: 22px;
-            position: absolute;
-            top: calc(50% - 25px);
-            left: 50%;
-            transform: translateX(-105%);
+            margin-bottom: 10px;
+            /* width: max-content; */
         }
         button:hover {
                 /* box-shadow: -2px -2px 6px rgba(255, 255, 255, 0.4), 2px 2px 6px rgba(0, 0, 0, 0.5), inset 2px -2px 5px rgba(255, 255, 255, 1), inset 2px 2px 4px rgba(0, 0, 0, 0.3); */
@@ -154,71 +158,116 @@
         
             button:active {
                 box-shadow: var(--outdent-active-shadow);
-                padding-top: 2px;
+                padding-top: 2px; /* Shift text down */
             }
 
         /*Up Button*/
         .up-btn {
-            height: 50px;
-            width: 200px;
+            /* height: 50px; */
+            /* width: 200px; */
+            /* width: 100%; */
+            margin-left: 5px;
+            /* border: 2px solid #0000FF */
         }
     
         /*Down Button*/
         .down-btn {
-            top: calc(50% - 25px);
-            transform: translateX(5%);
-            height: 50px;
-            width: 200px;
+            /* top: calc(50% - 25px); */
+            /* transform: translateX(5%); */
+            /* height: 50px; */
+            /* width: 200px; */
+            /* width: 100%; */
+            margin-right: 5px;
         }
 
         /*Range Value Label*/
         .value-box {
-            text;
-            align-items: center;
-            justify-content: center;
+            /* text; */
+            /* align-items: center; */
+            /* justify-content: center; */
             background: var(--background_color);
             color: #001f3f;
             border-radius: 9999px;
             box-shadow: var(--outdent-shadow);
             /* text-shadow: .5px .5px 0.9px rgba(0,0,0, .4); */
-            position: absolute;
-            top: calc(50% + 100px);
-            left: 50%;
-            transform: translateX(-50%);
-            /* border: 2px solid var(--background_color); */
-            cursor: pointer;
-            height: 50px;
-            width: 100px;
+            /* position: absolute;
+            top: calc(50% + 100px); */
+            /* left: 50%; */
+            /* transform: translateX(-50%); */
+            border: 0px solid var(--background_color);
+            /* cursor: pointer; */
+            /* height: 50px; */
+            /* width: 100px; */
             transition: all;
             transition-duration: var(--transition-duration);
-            display: flex;
+            /* display: flex; */
             font-size: 22px;
+            margin-bottom: 10px;
+            /* height: 50px;
+            width: 100%; */
         }
     
         /*Auto Button*/
         .auto-btn {
-            top: calc(50% - 95px);
-            transform: translateX(-50%);
-            height: 50px;
-            width: 420px;
-
+            /* top: calc(50% - 95px); */
+            /* transform: translateX(-50%); */
+            /* height: 50px; */
+            /* width: 420px; */
+            width: 100%;
+            /* margin: 10px 10px;  */
+            /* width: max-content; */
         }
+
+        .parent-div {
+            border: 2px solid #00FF00;
+            height: 500px;
+            width: min(500px, 100%);
+            margin: auto auto;
+            padding: 0 0;
+        }
+
+        .container {
+        /* border: 1px solid black; */
+        /* margin: 1rem; */
+        /* margin: 0 0;  */
+        /* border: 2px solid #00FF00; */
+        /* padding: 2rem 2rem; */
+        text-align: center;
+        display: flex;
+        margin: 0 0;
+        margin-bottom: 10px;
+        }
+
+        .horizontal-item {
+        /* display: inline-block; */
+        /* border: 1px solid red; */
+        /* padding: 1rem 1rem; */
+        /* vertical-align: middle; */
+        width: 50%;
+        /* width: calc(50% - 15px); */
+        }
+
     </style>
 </head>
 <body>
-    <main>
-        <input type="range" value="50" min="0" max="100" oninput="this.nextElementSibling.value = this.value">
-        <output class="value-box">50</output>
-    </main>
-    <button class="down-btn">
-        <span>Down</span>
-    </button>
-    <button class="up-btn">
-        <span>Up</span>
-    </button>
-    <button class="auto-btn">
-        <span>Auto</span>
-    </button>
+    <div class="parent-div">
+        <button class="auto-btn">
+            <span>Auto</span>
+        </button>
+        <div class="container">
+            <button class="down-btn horizontal-item">
+                <span>Down</span>
+            </button>
+            <button class="up-btn horizontal-item">
+                <span>Up</span>
+            </button>
+        </div>
+
+        <main>
+            <input type="range" value="50" min="0" max="100" oninput="this.nextElementSibling.value = this.value">
+            <output class="value-box">50</output>
+        </main>
+    </div>
 
 </body>
 </html>
