@@ -84,18 +84,14 @@
         /* SLIDER THUMB -> represented by the orange ball in the design */
         /* Webkit based browsers (chrome, opera, ...) */
         input[type="range"]::-webkit-slider-thumb {
-            /* Removes the default styling */
             appearance: none;
             border: none;
             width: 15%;
             height: 40px;
-            /* margin: 0 -20px; */
             background: var(--background_color);
             border-radius: 9999px;
             border: transparent 0 none;
-            /* padding: 2px 2px; */
             outline: solid 0 transparent;
-            /* The inset shadow gives depth and makes the thumb look 3 dimensional and the other one shows a subtle effect of the shadow it creates because of the light source coming from the top left of the page */
             box-shadow: var(--slider-thumb-shadow);
             transition: all;
             transition-duration: var(--transition-duration);
@@ -108,13 +104,10 @@
             border: none;
             width: 15%;
             height: calc(100% - 10px);
-            /* margin-left: 10px; */
             background: var(--background_color);
             border-radius: 9999px;
             border: transparent 0 none;
-            /* padding: 2px 2px; */
             outline: solid 0 transparent;
-            /* The inset shadow gives depth and makes the thumb look 3 dimensional and the other one shows a subtle effect of the shadow it creates because of the light source coming from the top left of the page */
             box-shadow: var(--slider-thumb-shadow);
             transition: all;
             transition-duration: var(--transition-duration);
