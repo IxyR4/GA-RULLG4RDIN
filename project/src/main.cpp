@@ -15,10 +15,16 @@
 
 #include "SPIFFS.h" // For file system (separate HTML file)
 
-/*Network credentials are stored in network_credentials.h, enter them there*/
+#include "ESPAsyncWebServer.h" // Probably not used yet
+
+/* Network credentials are stored in network_credentials.h, enter them there */
 #include "network_credentials.h"
+
+#define ONBOARD_LED  2
+
 const char* ssid = WIFI_SSID;  
 const char* password = WIFI_PASSWORD;  
+const char* id = WIFI_ID;  
 
 WebServer server(80);
 
@@ -47,28 +53,42 @@ String SendHTML(uint8_t led1stat,uint8_t led2stat);
 void setup() {
   Serial.begin(115200);
 
+  pinMode(ONBOARD_LED,OUTPUT);
+
   // Relics
   delay(100);
-  pinMode(LED1pin, OUTPUT);
-  pinMode(LED2pin, OUTPUT);
-
+  // pinMode(LED1pin, OUTPUT);
+  // pinMode(LED2pin, OUTPUT);
+  
   // Setup WiFi
   Serial.println("");
-  Serial.print("Connecting to: ");
-  Serial.println(ssid);
+  
+  if (id != "") {
+    Serial.print("Connecting to WPA2 network: ");
+    WiFi.begin(ssid, WPA2_AUTH_PEAP, id, id, password);
+  } else {
+    // Connect to provided WiFi network
+    Serial.print("Connecting to: ");
+    WiFi.begin(ssid, password);
+  }
 
-  // Connect to provided WiFi network
-  WiFi.begin(ssid, password);
+  Serial.println(ssid);
 
   // Wait until connected
   Serial.print("Connecting...");
-  while (WiFi.status() != WL_CONNECTED) {
   delay(1000);
+  while (WiFi.status() != WL_CONNECTED){
+  for (int i=0; i<2; i++) {
+    digitalWrite(ONBOARD_LED, HIGH);
+    delay(250);
+    digitalWrite(ONBOARD_LED, LOW);
+    delay(250);
+  }
   Serial.print(".");
   }
   Serial.println("");
   Serial.println("WiFi connected!");
-  Serial.print("Got IP: ");  Serial.println(WiFi.localIP());
+  Serial.print("Got IP: ");  Serial.println(WiFi.localIP()); 
 
   // Handle button presses, relics
   server.on("/", handle_OnConnect);
@@ -103,6 +123,14 @@ void handle_OnConnect() {
   LED2status = LOW;
   // Serial.println("GPIO4 Status: OFF | GPIO5 Status: OFF");
   server.send(200, "text/html", SendHTML(LED1status,LED2status)); // NOT COMPLETELY RELIC
+  
+  // delay(1000);
+  for (int i = 0; i<3; i++) {
+    digitalWrite(ONBOARD_LED,HIGH);
+    delay(100);
+    digitalWrite(ONBOARD_LED,LOW);
+    delay(100);
+  }
 }
 
 void handle_led1on() {
