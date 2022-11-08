@@ -3,7 +3,7 @@
  * Most code copied from: https://lastminuteengineers.com/creating-esp32-web-server-arduino-ide/#configuring-the-esp32-web-server-in-wifi-station-sta-mode 
  * Also used this: https://randomnerdtutorials.com/esp32-vs-code-platformio-spiffs/ (and some other pages on the same website)
  * 
- * There's still a lot of unnecessary code here caused by copying tutorials, sometimes marked 'relic'. 
+ * There's still some of unnecessary code here caused by copying tutorials, sometimes marked 'relic'. 
  * 
  * Current state: Can start a web server and load a separate HTML file (/../data/PCInterface.html) to show when connecting to it 
 
@@ -15,8 +15,6 @@
 
 #include "SPIFFS.h" // For file system (separate HTML file)
 
-#include "ESPAsyncWebServer.h" // Probably not used yet
-
 /* Network credentials are stored in network_credentials.h, enter them there */
 #include "network_credentials.h"
 
@@ -26,76 +24,77 @@ const char* ssid = WIFI_SSID;
 const char* password = WIFI_PASSWORD;  
 const char* id = WIFI_ID;  
 
+/*** Config ***/
+int wifi_connect_timeout = 30; // Seconds
+
+
+
 WebServer server(80);
-
-uint8_t LED1pin = 4;
-bool LED1status = LOW;
-
-uint8_t LED2pin = 5;
-bool LED2status = LOW;
 
 // Pre-declare functions to allow mentioning them before they are defined
 void handle_OnConnect();
 
-void handle_led1on();
+void handle_ledon();
 
-void handle_led1off();
-
-void handle_led2on();
-
-void handle_led2off();
+void handle_ledoff();
 
 void handle_NotFound();
 
-String SendHTML(uint8_t led1stat,uint8_t led2stat);
+String SendHTML();
 
 // Code starts here
 void setup() {
   Serial.begin(115200);
 
   pinMode(ONBOARD_LED,OUTPUT);
-
-  // Relics
-  delay(100);
-  // pinMode(LED1pin, OUTPUT);
-  // pinMode(LED2pin, OUTPUT);
   
-  // Setup WiFi
   Serial.println("");
-  
-  if (id != "") {
-    Serial.print("Connecting to WPA2 network: ");
-    WiFi.begin(ssid, WPA2_AUTH_PEAP, id, id, password);
+
+  // Setup WiFi  
+  if (id != "") { // Skolans nät (som kräver användarnamn (id) + lösen)
+    Serial.print("Connecting to WPA2 network: "); 
+    WiFi.begin(ssid, WPA2_AUTH_PEAP, "", id, password);
   } else {
     // Connect to provided WiFi network
     Serial.print("Connecting to: ");
     WiFi.begin(ssid, password);
   }
-
   Serial.println(ssid);
 
   // Wait until connected
   Serial.print("Connecting...");
   delay(1000);
-  while (WiFi.status() != WL_CONNECTED){
-  for (int i=0; i<2; i++) {
-    digitalWrite(ONBOARD_LED, HIGH);
-    delay(250);
-    digitalWrite(ONBOARD_LED, LOW);
-    delay(250);
+
+  for (int i = 1; i < wifi_connect_timeout; i++) { 
+    if (WiFi.status() == WL_CONNECTED)
+      break;
+
+    //Handle connection timeout
+    else if (i == wifi_connect_timeout) {
+      Serial.println("");
+      Serial.println("WiFi connection timeout. Aborting setup. ");
+      return;
+    }
+
+    // Blink light
+    for (int j=0; j<2; j++) { 
+      digitalWrite(ONBOARD_LED, HIGH);
+      delay(250);
+      digitalWrite(ONBOARD_LED, LOW);
+      delay(250);
+    }
+    Serial.print(".");
   }
-  Serial.print(".");
-  }
+
   Serial.println("");
   Serial.println("WiFi connected!");
-  Serial.print("Got IP: ");  Serial.println(WiFi.localIP()); 
+  Serial.print("IP address: ");  
+  Serial.println(WiFi.localIP()); 
 
   // Handle button presses, relics
   server.on("/", handle_OnConnect);
-  server.on("/led1on", handle_led1on);
-  server.on("/led1off", handle_led1off);
-  server.on("/led2on", handle_led2on);
-  server.on("/led2off", handle_led2off);
+  server.on("/ledon", handle_ledon);
+  server.on("/ledoff", handle_ledoff);
   server.onNotFound(handle_NotFound);
 
   server.begin();
@@ -117,14 +116,11 @@ void loop() {
   // {digitalWrite(LED2pin, LOW);}
 }
 
-// Mostly relics of example web page
+// On client connection
 void handle_OnConnect() {
-  LED1status = LOW;
-  LED2status = LOW;
-  // Serial.println("GPIO4 Status: OFF | GPIO5 Status: OFF");
-  server.send(200, "text/html", SendHTML(LED1status,LED2status)); // NOT COMPLETELY RELIC
+  server.send(200, "text/html", SendHTML());
   
-  // delay(1000);
+  // Blink LED 
   for (int i = 0; i<3; i++) {
     digitalWrite(ONBOARD_LED,HIGH);
     delay(100);
@@ -133,35 +129,23 @@ void handle_OnConnect() {
   }
 }
 
-void handle_led1on() {
-  LED1status = HIGH;
-  Serial.println("GPIO4 Status: ON");
-  server.send(200, "text/html", SendHTML(true,LED2status)); 
+void handle_ledon() {
+  digitalWrite(ONBOARD_LED, HIGH);
+  Serial.println("LED turned on. ");
+  // server.send(200, "text/html", SendHTML(true,LED2status)); 
 }
 
-void handle_led1off() {
-  LED1status = LOW;
-  Serial.println("GPIO4 Status: OFF");
-  server.send(200, "text/html", SendHTML(false,LED2status)); 
-}
-
-void handle_led2on() {
-  LED2status = HIGH;
-  Serial.println("GPIO5 Status: ON");
-  server.send(200, "text/html", SendHTML(LED1status,true)); 
-}
-
-void handle_led2off() {
-  LED2status = LOW;
-  Serial.println("GPIO5 Status: OFF");
-  server.send(200, "text/html", SendHTML(LED1status,false)); 
+void handle_ledoff() {
+  digitalWrite(ONBOARD_LED, LOW);
+  Serial.println("LED turned off. ");
+  // server.send(200, "text/html", SendHTML(false,LED2status)); 
 }
 
 void handle_NotFound(){
   server.send(404, "text/plain", "Not found");
 }
 
-String SendHTML(uint8_t led1stat,uint8_t led2stat){
+String SendHTML(){
 
   // Mount HTML file
   if(!SPIFFS.begin(true)){
@@ -182,14 +166,14 @@ String SendHTML(uint8_t led1stat,uint8_t led2stat){
   }
   html_file.close();
 
-  // If HTML file was loaded, return it 
+  // If HTML file successfully loaded, return it 
   if (html_string != "")
     return html_string;
   
-  // Default HTML page, relic
+  // Default HTML page, "relic"-ish, useful for when file loading failed
+  Serial.println("Failed loading HTML file. Returning default page. ");
   html_string = "<!DOCTYPE html> <html>\n";
   html_string +="<head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, user-scalable=no\">\n";
-  // html_string +="<title>LED Control</title>\n";
   html_string +="<style>html { font-family: Helvetica; display: inline-block; margin: 0px auto; text-align: center;}\n";
   html_string +="body{margin-top: 50px;} h1 {color: #444444;margin: 50px auto 30px;} h3 {color: #444444;margin-bottom: 50px;}\n";
   html_string +="p {font-size: 14px;color: #888;margin-bottom: 10px;}\n";
