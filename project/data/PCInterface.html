@@ -148,14 +148,13 @@
             /* width: max-content; */
         }
         button:hover {
-                /* box-shadow: -2px -2px 6px rgba(255, 255, 255, 0.4), 2px 2px 6px rgba(0, 0, 0, 0.5), inset 2px -2px 5px rgba(255, 255, 255, 1), inset 2px 2px 4px rgba(0, 0, 0, 0.3); */
-                box-shadow: var(--outdent-hover-shadow);
-            }
-        
-            button:active {
-                box-shadow: var(--outdent-active-shadow);
-                padding-top: 5px; /* Shift text down */
-            }
+            box-shadow: var(--outdent-hover-shadow);
+        }
+    
+        button:active {
+            box-shadow: var(--outdent-active-shadow);
+            padding-top: 5px; /* Shift text down */
+        }
 
         /*Up Button*/
         .up-btn {
@@ -226,33 +225,33 @@
         }
 
         .container {
-        /* border: 1px solid black; */
-        /* margin: 1rem; */
-        /* margin: 0 0;  */
-        /* border: 2px solid #00FF00; */
-        /* padding: 2rem 2rem; */
-        text-align: center;
-        display: flex;
-        margin: 0 0;
-        margin-bottom: var(--margin);
+            /* border: 1px solid black; */
+            /* margin: 1rem; */
+            /* margin: 0 0;  */
+            /* border: 2px solid #00FF00; */
+            /* padding: 2rem 2rem; */
+            text-align: center;
+            display: flex;
+            margin: 0 0;
+            margin-bottom: var(--margin);
         }
 
         .horizontal-item {
-        width: 50%;
+            width: 50%;
         }
 
     </style>
 </head>
 <body>
     <div class="parent-div">
-        <button class="auto-btn">
+        <button class="auto-btn" onclick="document.location='/auto'">
             <span>Auto</span>
         </button>
         <div class="container">
-            <button class="down-btn horizontal-item">
+            <button class="down-btn horizontal-item" onclick="document.location='/ledoff'">
                 <span>Down</span>
             </button>
-            <button class="up-btn horizontal-item">
+            <button class="up-btn horizontal-item" onclick="document.location='/ledon'">
                 <span>Up</span>
             </button>
         </div>

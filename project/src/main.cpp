@@ -132,17 +132,17 @@ void handle_OnConnect() {
 void handle_ledon() {
   digitalWrite(ONBOARD_LED, HIGH);
   Serial.println("LED turned on. ");
-  // server.send(200, "text/html", SendHTML(true,LED2status)); 
+  server.send(200, "text/html", SendHTML()); 
 }
 
 void handle_ledoff() {
   digitalWrite(ONBOARD_LED, LOW);
   Serial.println("LED turned off. ");
-  // server.send(200, "text/html", SendHTML(false,LED2status)); 
+  server.send(200, "text/html", SendHTML()); 
 }
 
 void handle_NotFound(){
-  server.send(404, "text/plain", "Not found");
+  server.send(200, "text/html", SendHTML()); 
 }
 
 String SendHTML(){
