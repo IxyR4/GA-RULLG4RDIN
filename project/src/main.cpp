@@ -63,9 +63,17 @@ void setup() {
 
   // Wait until connected
   Serial.print("Connecting...");
-  delay(1000);
+  // delay(1000);
 
   for (int i = 1; i < wifi_connect_timeout; i++) { 
+    // Blink light
+    for (int j=0; j<2; j++) { 
+      digitalWrite(ONBOARD_LED, HIGH);
+      delay(250);
+      digitalWrite(ONBOARD_LED, LOW);
+      delay(250);
+    }
+
     if (WiFi.status() == WL_CONNECTED)
       break;
 
@@ -75,14 +83,6 @@ void setup() {
       Serial.println("WiFi connection timeout. Aborting setup. ");
       return;
     }
-
-    // Blink light
-    for (int j=0; j<2; j++) { 
-      digitalWrite(ONBOARD_LED, HIGH);
-      delay(250);
-      digitalWrite(ONBOARD_LED, LOW);
-      delay(250);
-    }
     Serial.print(".");
   }
 
@@ -91,7 +91,7 @@ void setup() {
   Serial.print("IP address: ");  
   Serial.println(WiFi.localIP()); 
 
-  // Handle button presses, relics
+  // Handle button presses
   server.on("/", handle_OnConnect);
   server.on("/ledon", handle_ledon);
   server.on("/ledoff", handle_ledoff);
