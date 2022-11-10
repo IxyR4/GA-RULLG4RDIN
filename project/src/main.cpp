@@ -25,7 +25,7 @@ const char* password = WIFI_PASSWORD;
 const char* id = WIFI_ID;  
 
 /*** Config ***/
-int wifi_connect_timeout = 30; // Seconds
+int wifi_connect_timeout = 10; // Seconds
 
 
 
@@ -121,24 +121,22 @@ void handle_OnConnect() {
   server.send(200, "text/html", SendHTML());
   
   // Blink LED 
-  for (int i = 0; i<3; i++) {
-    digitalWrite(ONBOARD_LED,HIGH);
-    delay(100);
-    digitalWrite(ONBOARD_LED,LOW);
-    delay(100);
-  }
+  // for (int i = 0; i<3; i++) {
+  //   digitalWrite(ONBOARD_LED,HIGH);
+  //   delay(100);
+  //   digitalWrite(ONBOARD_LED,LOW);
+  //   delay(100);
+  // }
 }
 
 void handle_ledon() {
   digitalWrite(ONBOARD_LED, HIGH);
   Serial.println("LED turned on. ");
-  server.send(200, "text/html", SendHTML()); 
 }
 
 void handle_ledoff() {
   digitalWrite(ONBOARD_LED, LOW);
   Serial.println("LED turned off. ");
-  server.send(200, "text/html", SendHTML()); 
 }
 
 void handle_NotFound(){
