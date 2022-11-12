@@ -13,11 +13,7 @@
     </script>
     <style>
         * {
-            /* padding: 5px; */
-            /* margin: auto; */
             height: 50px;
-            /* margin: 10px 5px; */
-            /* align-items: center; */
         }
         
         /* Variables, they do exist */
@@ -43,36 +39,20 @@
             background-color: var(--background_color);
             width: 100%;
             height: 100%;
-            /* margin: 10px 10px; */
-            /* display: flex; */
             font-family: 'Muli';
             font-size: 22px;
             padding: 20% 0;
         }
     
         input[type="range"] {
-            /* To remove default styles appplied by webkit browsers */
             appearance: none;
             width: 100%;
-            /* position: absolute;
-            top: calc(50% + 40px); */
             background: var(--background_color);
-            /* left: 50%; */
-            /* transform: translateX(-50%); */
             border-radius: 9999px;
             justify-content: center;
-            /* align-items: center; */
-            /* margin: 10px; */
-            /* box-sizing: border-box; */
-            /* background: none; */
-            /* width: 100%; */
-            /* height: 50px; */
             padding: 0 5px; 
-            /* border-radius: 2em; */
             transition: all;
             transition-duration: var(--transition-duration);
-            /* border: 2px none var(--background_color); */
-            /* These shadow are what create the skeumorphic indent on the track. The first one is dark to show places in the indent that light don't reach and the second one shows places where light meets thereby creating the illusion of depth */
             box-shadow: var(--indent-shadow);
             margin-bottom: var(--margin);
         }
@@ -135,18 +115,12 @@
             color: #001f3f;
             border-radius: 9999px;
             box-shadow: var(--outdent-shadow); 
-            /* text-shadow: .5px .5px 0.9px rgba(0,0,0, .4); */
-            /* position: absolute; */
             border: 0px solid var(--background_color);
             cursor: pointer;
             transition: all;
             transition-duration: var(--transition-duration);
-            /* display: flex; */
-            /* align-items: center; */
-            /* justify-content: center; */
             font-size: 22px;
             margin-bottom: var(--margin);
-            /* width: max-content; */
         }
         button:hover {
             box-shadow: var(--outdent-hover-shadow);
@@ -159,61 +133,34 @@
 
         /*Up Button*/
         .up-btn {
-            /* height: 50px; */
-            /* width: 200px; */
-            /* width: 100%; */
             margin-left: calc(0.5 * var(--margin));
-            /* border: 2px solid #0000FF */
         }
     
         /*Down Button*/
         .down-btn {
-            /* top: calc(50% - 25px); */
-            /* transform: translateX(5%); */
-            /* height: 50px; */
-            /* width: 200px; */
-            /* width: 100%; */
             margin-right: calc(0.5 * var(--margin));
         }
 
         /*Range Value Label*/
         .value-box {
             display: grid;
-            /* text; */
             align-items: center;
             justify-content: center;
             background: var(--background_color);
             color: #001f3f;
             border-radius: 9999px;
             box-shadow: var(--outdent-shadow);
-            /* text-shadow: .5px .5px 0.9px rgba(0,0,0, .4); */
-            /* position: absolute;
-            top: calc(50% + 100px); */
-            /* left: 50%; */
-            /* transform: translateX(-50%); */
-            /* border: 0px solid var(--background_color); */
-            /* cursor: pointer; */
-            /* height: 50px; */
-            /* width: 100px; */
             transition: all;
             transition-duration: var(--transition-duration);
-            /* display: flex; */
             font-size: 22px;
             margin: auto;
             margin-bottom: var(--margin);
-            /* height: 50px; */
             width: 20%;
         }
     
         /*Auto Button*/
         .auto-btn {
-            /* top: calc(50% - 95px); */
-            /* transform: translateX(-50%); */
-            /* height: 50px; */
-            /* width: 420px; */
             width: 100%;
-            /* margin: 10px 10px;  */
-            /* width: max-content; */
         }
 
         .parent-div {
@@ -226,11 +173,6 @@
         }
 
         .container {
-            /* border: 1px solid black; */
-            /* margin: 1rem; */
-            /* margin: 0 0;  */
-            /* border: 2px solid #00FF00; */
-            /* padding: 2rem 2rem; */
             text-align: center;
             display: flex;
             margin: 0 0;
