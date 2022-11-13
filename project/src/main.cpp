@@ -133,6 +133,9 @@ wifiConnected:
 
   // Handle button presses
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
+    request->redirect("http://" + WiFi.localIP().toString() + "/home");
+  });
+  server.on("/home", HTTP_GET, [](AsyncWebServerRequest *request){
     request->send(200, "text/html", SendHTML());
   });
   server.on("/ledon", [](AsyncWebServerRequest *request){
