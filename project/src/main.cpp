@@ -1,17 +1,17 @@
 /**********
 
- * Most code copied from: https://lastminuteengineers.com/creating-esp32-web-server-arduino-ide/#configuring-the-esp32-web-server-in-wifi-station-sta-mode 
+ * Some code copied from: https://lastminuteengineers.com/creating-esp32-web-server-arduino-ide/#configuring-the-esp32-web-server-in-wifi-station-sta-mode 
  * Also used this: https://randomnerdtutorials.com/esp32-vs-code-platformio-spiffs/ (and some other pages on the same website)
  * 
- * There's still some of unnecessary code here caused by copying tutorials, sometimes marked 'relic'. 
  * 
- * Current state: Can start a web server and load a separate HTML file (/../data/PCInterface.html) to show when connecting to it 
+ * Current state: Can start a web server and allow connected client to control onboard blue LED using up/down buttons on web page
 
 **********/
 
 #include <Arduino.h>
 #include <WiFi.h>
-#include <WebServer.h>
+#include <ESPAsyncWebServer.h>
+#include <ESPmDNS.h>
 
 #include "SPIFFS.h" // For file system (separate HTML file)
 
@@ -20,16 +20,16 @@
 
 #define ONBOARD_LED  2
 
-const char* ssid = WIFI_SSID;  
-const char* password = WIFI_PASSWORD;  
-const char* id = WIFI_ID;  
+const char* ssid[] = WIFI_SSID;
+const char* password[] = WIFI_PASSWORD;
+const char* id[] = WIFI_ID;
 
 /*** Config ***/
-int wifi_connect_timeout = 10; // Seconds
+const int wifi_connect_timeout_per_network = 10; // Seconds
+const int wifi_scan_tries = 2; // How many scans it should do before giving up
+const int wifi_scan_delay = 5; // How long to wait between scans
 
-
-
-WebServer server(80);
+AsyncWebServer  server(80);
 
 // Pre-declare functions to allow mentioning them before they are defined
 void handle_OnConnect();
@@ -42,7 +42,8 @@ void handle_NotFound();
 
 String SendHTML();
 
-// Code starts here
+void flash_led(int flashes, int on_time, int off_time);
+
 void setup() {
   Serial.begin(115200);
 
@@ -51,82 +52,103 @@ void setup() {
   Serial.println("");
 
   // Setup WiFi  
-  if (id != "") { // Skolans nät (som kräver användarnamn (id) + lösen)
-    Serial.print("Connecting to WPA2 network: "); 
-    WiFi.begin(ssid, WPA2_AUTH_PEAP, "", id, password);
-  } else {
-    // Connect to provided WiFi network
-    Serial.print("Connecting to: ");
-    WiFi.begin(ssid, password);
-  }
-  Serial.println(ssid);
+  
+  // Do up to wifi_scan_tries scans
+  for (int s = 0; s < wifi_scan_tries; s++) {
+    Serial.println("Scanning for available WiFi networks... ");
+    flash_led(2, 100, 100);
 
-  // Wait until connected
-  Serial.print("Connecting...");
-  // delay(1000);
+    int n = WiFi.scanNetworks(); // n = number of networks found
 
-  for (int i = 1; i < wifi_connect_timeout; i++) { 
-    // Blink light
-    for (int j=0; j<2; j++) { 
-      digitalWrite(ONBOARD_LED, HIGH);
-      delay(250);
-      digitalWrite(ONBOARD_LED, LOW);
-      delay(250);
+    // If any network found...
+    if (n != 0) {
+      delay(100); // Probably not needed
+
+      // Print out network names
+      Serial.printf("%i networks found: \n", n);
+      for (int j = 0; j < min(n, 10); j++) 
+        Serial.printf(": %s \n", WiFi.SSID(j));
+      Serial.print("\n");
+      if (n > 10)
+        Serial.printf("...and %i more \n", n - 10);
+
+      // Check networks found in scan for ones provided in network_credentials.h
+      for (int i = 0; i < sizeof(ssid) / sizeof(ssid[0]); i++) {  // Loop through network_credentials.h entries...
+        for (int j = 0; j < n; j++) {  // Loop through scan results...
+
+          if (WiFi.SSID(j) == ssid[i]) {
+            // Matching entry found
+            if (id[i] != "") { // Skolans nät (som kräver användarnamn (id) + lösen)
+              Serial.print("Connecting to WPA2 network: "); 
+              WiFi.begin(ssid[i], WPA2_AUTH_PEAP, "", id[i], password[i]);
+            } else {
+              // Connect to provided WiFi network
+              Serial.print("Connecting to: ");
+              WiFi.begin(ssid[i], password[i]);
+            }
+            Serial.println(WiFi.SSID(j));
+
+            // Wait until connected
+            Serial.print("Connecting...");
+            for (int m = 1; m <= wifi_connect_timeout_per_network; m++) { 
+              // Blink light (takes 1 second)
+              flash_led(1, 500, 500);
+
+              if (WiFi.status() == WL_CONNECTED)
+                goto wifiConnected;
+
+              // Connection timeout
+              else if (m == wifi_connect_timeout_per_network) {
+                Serial.println("");
+                Serial.print("WiFi connection timeout. \n");
+                WiFi.disconnect();
+                delay(1000);
+              } else  // Keep waiting
+                Serial.print(".");
+            }          
+          }
+        }
+      }
     }
-
-    if (WiFi.status() == WL_CONNECTED)
-      break;
-
-    //Handle connection timeout
-    else if (i == wifi_connect_timeout) {
-      Serial.println("");
-      Serial.println("WiFi connection timeout. Aborting setup. ");
-      return;
-    }
-    Serial.print(".");
+    // If no networks were found, or none were connected to
+    Serial.printf("No networks found. Scanning again in %i seconds. \n", wifi_scan_delay);
+    delay(wifi_scan_delay * 1000);
   }
 
-  Serial.println("");
-  Serial.println("WiFi connected!");
-  Serial.print("IP address: ");  
-  Serial.println(WiFi.localIP()); 
+  // Indicate connection failed
+  Serial.println("\nFailed connecting to WiFi. Aborting setup.");
+  flash_led(3, 1000, 1000);
+  return;
+
+wifiConnected:
+  Serial.println("\n\nWiFi connected!");
+  Serial.print(": IP address: ");  
+  Serial.println(WiFi.localIP());
+  flash_led(3, 100, 100);
+   
+  if(!MDNS.begin("rullgardin")) 
+     Serial.println(": Error starting mDNS. ");
+  else 
+    Serial.println(": Also available at: rullgardin.local");
 
   // Handle button presses
-  server.on("/", handle_OnConnect);
-  server.on("/ledon", handle_ledon);
-  server.on("/ledoff", handle_ledoff);
-  server.onNotFound(handle_NotFound);
+  server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
+    request->send(200, "text/html", SendHTML());
+  });
+  server.on("/ledon", [](AsyncWebServerRequest *request){
+    handle_ledon();
+    request->send(200);
+  });
+  server.on("/ledoff", [](AsyncWebServerRequest *request){
+    handle_ledoff();
+    request->send(200);
+  });
 
   server.begin();
-  Serial.println("HTTP server started. ");
+  Serial.println(": HTTP server started. ");
 }
+
 void loop() {
-  server.handleClient();
-
-  // Relic
-
-  // if(LED1status)
-  // {digitalWrite(LED1pin, HIGH);}
-  // else
-  // {digitalWrite(LED1pin, LOW);}
-  
-  // if(LED2status)
-  // {digitalWrite(LED2pin, HIGH);}
-  // else
-  // {digitalWrite(LED2pin, LOW);}
-}
-
-// On client connection
-void handle_OnConnect() {
-  server.send(200, "text/html", SendHTML());
-  
-  // Blink LED 
-  // for (int i = 0; i<3; i++) {
-  //   digitalWrite(ONBOARD_LED,HIGH);
-  //   delay(100);
-  //   digitalWrite(ONBOARD_LED,LOW);
-  //   delay(100);
-  // }
 }
 
 void handle_ledon() {
@@ -139,10 +161,7 @@ void handle_ledoff() {
   Serial.println("LED turned off. ");
 }
 
-void handle_NotFound(){
-  server.send(200, "text/html", SendHTML()); 
-}
-
+// Prepares HTML code to send to client, from PCInterface.html
 String SendHTML(){
 
   // Mount HTML file
@@ -184,4 +203,13 @@ String SendHTML(){
   html_string +="</html>\n";
 
   return html_string;
+}
+
+void flash_led(int flashes, int on_time, int off_time) {
+  for (int i = 0; i < flashes; i++) {
+      digitalWrite(ONBOARD_LED, HIGH);
+      delay(on_time);
+      digitalWrite(ONBOARD_LED, LOW);
+      delay(off_time);
+  }
 }

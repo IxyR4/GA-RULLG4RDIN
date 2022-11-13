@@ -1,3 +1,4 @@
-#define WIFI_SSID "my_network_name"
-#define WIFI_PASSWORD "my_password"
-#define WIFI_ID "" // Leave as "" if not username is needed
+// Supports adding multiple networks. If multiple are available, it will connect to the first one specified here. 
+#define WIFI_SSID { "my_network_name", "network_name_2" }
+#define WIFI_PASSWORD { "my_password", "password_2" }
+#define WIFI_ID { "", "id_2" } // Mailaddress för skolans WiFi, annars ""
