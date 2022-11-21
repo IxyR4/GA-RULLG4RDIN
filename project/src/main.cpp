@@ -68,9 +68,9 @@ void setup() {
       Serial.printf("%i networks found: \n", n);
       for (int j = 0; j < min(n, 10); j++) 
         Serial.printf(": %s \n", WiFi.SSID(j));
-      Serial.print("\n");
       if (n > 10)
-        Serial.printf("...and %i more \n", n - 10);
+        Serial.printf("...and %i more", n - 10);
+      Serial.print("\n");
 
       // Check networks found in scan for ones provided in network_credentials.h
       for (int i = 0; i < sizeof(ssid) / sizeof(ssid[0]); i++) {  // Loop through network_credentials.h entries...
