@@ -6,7 +6,7 @@
     <link rel="stylesheet" href="style.css" />
     <link href='https://fonts.googleapis.com/css?family=Muli' rel='stylesheet'>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js">/* Import Ajax, which allow for using $.post to send data to the ESP */</script> 
     <script>
         var w = window.innerWidth;
         var h = window.innerHeight;
@@ -40,25 +40,27 @@
             font-family: 'Muli';
             font-size: 22px;
             padding: 0 0;
+            margin: 0;
         }
     
         input[type="range"] {
             appearance: none;
             width: calc(100% - 10px);
+            height: 40px;
             background: var(--background_color);
             border-radius: 9999px;
-            padding: 0 5px; 
+            padding: 5px 5px;
+            margin: 0 0;
             transition: all;
             transition-duration: var(--transition-duration);
             box-shadow: var(--indent-shadow);
-            margin-bottom: var(--margin);
-            margin: auto 0;
+            grid-area: slider;
         }
 
-        input[type="range"]:focus {
+        /* input[type="range"]:focus { */
             /* To remove default (mostly blue) outline appplied by browsers on :focus */
             /* outline: 0; */
-        }
+        /* } */
 
         /* SLIDER THUMB */
         /* Webkit based browsers (chrome, opera, ...) */
@@ -66,14 +68,10 @@
             appearance: none;
             border: none;
             width: 15%;
-            height: calc(100% - 10px);
+            height: 100%;
             background: var(--background_color);
             border-radius: 9999px;
-            border: transparent 0 none;
-            outline: solid 0 transparent;
             box-shadow: var(--slider-thumb-shadow);
-            transition: all;
-            transition-duration: var(--transition-duration);
             cursor: pointer;
         }
 
@@ -82,14 +80,10 @@
             appearance: none;
             border: none;
             width: 15%;
-            height: calc(100% - 10px);
+            height: 100%;
             background: var(--background_color);
             border-radius: 9999px;
-            border: transparent 0 none;
-            outline: solid 0 transparent;
             box-shadow: var(--slider-thumb-shadow);
-            transition: all;
-            transition-duration: var(--transition-duration);
             cursor: pointer;
         }
 
@@ -118,7 +112,7 @@
             transition: all;
             transition-duration: var(--transition-duration);
             font-size: 22px;
-            margin-bottom: var(--margin);
+            padding: 0;
         }
         button:hover {
             box-shadow: var(--outdent-hover-shadow);
@@ -131,12 +125,12 @@
 
         /*Up Button*/
         .up-btn {
-            margin-left: calc(0.5 * var(--margin));
+            grid-area: up-btn;
         }
     
         /*Down Button*/
         .down-btn {
-            margin-right: calc(0.5 * var(--margin));
+            grid-area: down-btn;
         }
 
         /*Range Value Label*/
@@ -150,14 +144,16 @@
             box-shadow: var(--outdent-shadow);
             transition: all;
             transition-duration: var(--transition-duration);
-            margin: auto;
-            margin-bottom: var(--margin);
-            width: 20%;
+            width: 75px;
+            /* Center the stupid thing: */
+            margin-left: 200px;
+            transform: translateX(-50%)
         }
     
         /*Auto Button*/
         .auto-btn {
             width: 100%;
+            grid-area: auto-btn;
         }
 
         .parent-div {
@@ -166,21 +162,17 @@
             left: 50%;
             top: 50%;
             transform: translate(-50%, -50%);
-            /* height: 260px; */
             height: fit-content;
             width: min(400px, 100%);
             border: 2px solid #001f3f;
-        }
-
-        .container {
-            text-align: center;
-            display: flex;
-            margin: 0 0;
-            margin-bottom: var(--margin);
-        }
-
-        .horizontal-item {
-            width: 50%;
+            
+            display: grid;
+            grid-template:
+                'auto-btn auto-btn'
+                'down-btn up-btn'
+                'slider slider';
+            grid-gap: 15px;
+            grid-auto-columns: minmax(0, 1fr); /* Make columns equal size */
         }
 
     </style>
@@ -190,20 +182,14 @@
         <button class="auto-btn" onclick="document.location='/auto'">
             <span>Auto</span>
         </button>
-        <div class="container">
-            <button class="down-btn horizontal-item" onclick="$.post( '/ledoff')"> 
-                <span>Down</span>
-            </button>
-            <button class="up-btn horizontal-item" onclick="$.post( '/ledon')"> 
-                <span>Up</span>
-            </button>
-        </div>
-
-        <main>
-            <input type="range" value="50" min="0" max="100" oninput="this.nextElementSibling.value = this.value">
-            <output class="value-box">50</output>
-        </main>
+        <button class="down-btn" onclick="$.post( '/ledoff')"> 
+            <span>Down</span>
+        </button>
+        <button class="up-btn" onclick="$.post( '/ledon')"> 
+            <span>Up</span>
+        </button>
+        <input type="range" value="50" min="0" max="100" oninput="this.nextElementSibling.value = this.value">
+        <output class="value-box">50</output>
     </div>
-
 </body>
 </html>
