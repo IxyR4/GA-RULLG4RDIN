@@ -32,12 +32,12 @@ const int wifi_scan_delay = 5; // How long to wait between scans
 AsyncWebServer  server(80);
 
 // Pre-declare functions to allow mentioning them before they are defined
+bool setup_wifi_success();
+bool connect_wifi_network(String ssid, String password, String id);
+
 void handle_OnConnect();
-
 void handle_ledon();
-
 void handle_ledoff();
-
 void handle_NotFound();
 
 String SendHTML();
@@ -51,88 +51,67 @@ void setup() {
   
   Serial.println("");
 
-  // Setup WiFi  
-  
+  if (setup_wifi_success()) {
+  } else {
+
+  }
+}
+
+void loop() {
+}
+
+bool setup_wifi_success() {
+  // If only one network is configured, skip WiFi scan and connect immediately 
+  if (sizeof(ssid) / sizeof(ssid[0]) == 1)
+      return connect_wifi_network(ssid[0], password[0], id[0]);    
+
   // Do up to wifi_scan_tries scans
   for (int s = 0; s < wifi_scan_tries; s++) {
     Serial.println("Scanning for available WiFi networks... ");
     flash_led(2, 100, 100);
 
-    int n = WiFi.scanNetworks(); // n = number of networks found
+    int networks_found = WiFi.scanNetworks();
 
-    // If any network found...
-    if (n != 0) {
-      delay(100); // Probably not needed
+    if (networks_found == 0) 
+      goto noNetworksFound;
 
-      // Print out network names
-      Serial.printf("%i networks found: \n", n);
-      for (int j = 0; j < min(n, 10); j++) 
-        Serial.printf(": %s \n", WiFi.SSID(j));
-      if (n > 10)
-        Serial.printf("...and %i more", n - 10);
-      Serial.print("\n");
+    delay(100); // Probably not needed
 
-      // Check networks found in scan for ones provided in network_credentials.h
-      for (int i = 0; i < sizeof(ssid) / sizeof(ssid[0]); i++) {  // Loop through network_credentials.h entries...
-        for (int j = 0; j < n; j++) {  // Loop through scan results...
+    // Print out network names
+    Serial.printf("%i networks found: \n", networks_found);
+    for (int j = 0; j < min(networks_found, 10); j++) 
+      Serial.printf(": %s \n", WiFi.SSID(j));
+    if (networks_found > 10)
+      Serial.printf("...and %i more", networks_found - 10);
+    Serial.print("\n");
 
-          if (WiFi.SSID(j) == ssid[i]) {
-            // Matching entry found
-            if (id[i] != "") { // Skolans nät (som kräver användarnamn (id) + lösen)
-              Serial.print("Connecting to WPA2 network: "); 
-              WiFi.begin(ssid[i], WPA2_AUTH_PEAP, "", id[i], password[i]);
-            } else {
-              // Connect to provided WiFi network
-              Serial.print("Connecting to: ");
-              WiFi.begin(ssid[i], password[i]);
-            }
-            Serial.println(WiFi.SSID(j));
-
-            // Wait until connected
-            Serial.print("Connecting...");
-            for (int m = 1; m <= wifi_connect_timeout_per_network; m++) { 
-              // Blink light (takes 1 second)
-              flash_led(1, 500, 500);
-
-              if (WiFi.status() == WL_CONNECTED)
-                goto wifiConnected;
-
-              // Connection timeout
-              else if (m == wifi_connect_timeout_per_network) {
-                Serial.println("");
-                Serial.print("WiFi connection timeout. \n");
-                WiFi.disconnect();
-                delay(1000);
-              } else  // Keep waiting
-                Serial.print(".");
-            }          
-          }
-        }
+    // Check networks found in scan for ones provided in network_credentials.h
+    for (int i = 0; i < sizeof(ssid) / sizeof(ssid[0]); i++) {  // Loop through network_credentials.h entries...
+      for (int j = 0; j < networks_found; j++) {  // Loop through scan results...
+        // When matching entry found, try connecting
+        if (WiFi.SSID(j) == ssid[i] && connect_wifi_network(ssid[i], password[i], id[i])) 
+          goto wifiConnected;
       }
     }
     // If no networks were found, or none were connected to
+noNetworksFound: 
     Serial.printf("No networks found. Scanning again in %i seconds. \n", wifi_scan_delay);
     delay(wifi_scan_delay * 1000);
   }
-
-  // Indicate connection failed
-  Serial.println("\nFailed connecting to WiFi. Aborting setup.");
-  flash_led(3, 1000, 1000);
-  return;
-
 wifiConnected:
   Serial.println("\n\nWiFi connected!");
   Serial.print(": IP address: ");  
   Serial.println(WiFi.localIP());
   flash_led(3, 100, 100);
-   
+  
   if(!MDNS.begin("rullgardin")) 
-     Serial.println(": Error starting mDNS. ");
+    Serial.println(": Error starting mDNS. ");
   else 
     Serial.println(": Also available at: rullgardin.local");
 
+  // Setup Server //
   // Handle button presses
-  server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
+  server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){  // Redirect mDNS connections to internal IP due to encountering delays when using mDNS
     request->redirect("http://" + WiFi.localIP().toString() + "/home");
   });
   server.on("/home", HTTP_GET, [](AsyncWebServerRequest *request){
@@ -149,9 +128,41 @@ wifiConnected:
 
   server.begin();
   Serial.println(": HTTP server started. ");
+
+  return true;
 }
 
-void loop() {
+bool connect_wifi_network(String ssid, String password, String id="") {
+  if (id != "") { // Skolans nät (som kräver användarnamn (id) + lösen)
+    Serial.print("Connecting to WPA2 network: "); 
+    WiFi.begin(ssid.c_str(), WPA2_AUTH_PEAP, "", id.c_str(), password.c_str());
+  } else {
+    // Connect to provided WiFi network
+    Serial.print("Connecting to: ");
+    WiFi.begin(ssid.c_str(), password.c_str());
+  }
+  Serial.println(ssid.c_str());
+
+  // Wait until connected
+  Serial.print("Connecting...");
+  for (int m = 1; m <= wifi_connect_timeout_per_network; m++) { 
+    // Blink light (takes 1 second)
+    flash_led(1, 500, 500);
+
+    if (WiFi.status() == WL_CONNECTED)
+      return true;
+
+    // Connection timeout
+    else if (m == wifi_connect_timeout_per_network) {
+      Serial.println("");
+      Serial.print("WiFi connection timeout. \n");
+      WiFi.disconnect();
+      delay(1000);
+      return false;
+    } else  // Keep waiting
+      Serial.print(".");
+  }
+  return false;
 }
 
 void handle_ledon() {
