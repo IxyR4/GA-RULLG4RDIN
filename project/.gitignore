@@ -1,2 +1,7 @@
-.pio
+.pio/
 .vscode/
+.github/
+sonarqube/
+src/.scannerwork
+compile_commands.json
+sonar-project.properties
