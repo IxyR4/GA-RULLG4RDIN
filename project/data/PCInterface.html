@@ -59,7 +59,8 @@
             grid-template:
                 'auto-btn auto-btn'
                 'down-btn up-btn'
-                'slider slider';
+                'slider slider'
+                'value-box value-box';
             grid-gap: 15px;
             grid-auto-columns: minmax(0, 1fr); /* Make columns equal size */
         }
@@ -173,6 +174,7 @@
             transition: all;
             transition-duration: var(--transition-duration);
             width: 75px;
+            grid-area: value-box;
             /* Center the stupid thing: */
             margin-left: 200px;
             transform: translateX(-50%)
