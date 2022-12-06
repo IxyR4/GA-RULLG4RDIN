@@ -193,7 +193,10 @@
         <button class="up-btn" onclick="$.post('/ledon')"> 
             <span>Up</span>
         </button>
-        <input type="range" value="50" min="0" max="100" oninput="this.nextElementSibling.value = this.value">
+        <input type="range" value="50" min="0" max="100" 
+            oninput="this.nextElementSibling.value = this.value" 
+            onmouseup="$.post('/slider/' + this.value)" 
+            ontouchend="$.post('/slider/' + this.value)" > <!-- onmouseup for desktop, ontouchend for mobile -->
         <output class="value-box">50</output>
     </div>
 </body>

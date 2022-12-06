@@ -17,6 +17,15 @@
 
 /* Network credentials are stored in network_credentials.h, enter them there */
 #include "network_credentials.h"
+#include <AccelStepper.h>
+ 
+// Define stepper motor connections and motor interface type. Motor interface type must be set to 1 when using a driver:
+#define dirPin 22
+#define stepPin 23
+#define motorInterfaceType 1
+ 
+// Create a new instance of the AccelStepper class
+AccelStepper stepper = AccelStepper(motorInterfaceType, stepPin, dirPin);
 
 #define ONBOARD_LED  2
 
@@ -25,9 +34,9 @@ const char* password[] = WIFI_PASSWORD;
 const char* id[] = WIFI_ID;
 
 /*** Config ***/
-const int wifi_connect_timeout_per_network = 10; // Seconds
-const int wifi_scan_tries = 2; // How many scans it should do before giving up
-const int wifi_scan_delay = 5; // How long to wait between scans
+const uint8_t wifi_connect_seconds_timeout_per_network = 10; // Seconds
+const uint8_t wifi_scan_tries = 2; // How many scans it should do before giving up
+const uint8_t wifi_scan_delay_seconds = 5; // How long to wait between scans
 
 AsyncWebServer  server(80);
 
@@ -38,23 +47,25 @@ bool connect_wifi_network(String ssid, String password, String id);
 void handle_OnConnect();
 void handle_ledon();
 void handle_ledoff();
+void handle_slider(String url);
 void handle_NotFound();
 
 String SendHTML();
 
-void flash_led(int flashes, int on_time, int off_time);
+void flash_led(uint8_t flashes, uint16_t on_time, uint16_t off_time);
 
 void setup() {
   Serial.begin(115200);
+
+  // Set the maximum motor speed in steps per second
+  stepper.setMaxSpeed(100);
 
   pinMode(ONBOARD_LED,OUTPUT);
   
   Serial.println("");
 
-  if (setup_wifi_success()) {
-  } else {
-
-  }
+  if (!setup_wifi_success())
+    Serial.println("Network connection failed, continuing in offline mode (which is the exact same thing as online mode).");
 }
 
 void loop() {
@@ -66,39 +77,39 @@ bool setup_wifi_success() {
       return connect_wifi_network(ssid[0], password[0], id[0]);    
 
   // Do up to wifi_scan_tries scans
-  for (int s = 0; s < wifi_scan_tries; s++) {
+  for (uint8_t s = 0; s < wifi_scan_tries; s++) {
     Serial.println("Scanning for available WiFi networks... ");
     flash_led(2, 100, 100);
 
-    int networks_found = WiFi.scanNetworks();
+    uint8_t networks_found = WiFi.scanNetworks();
 
     if (networks_found == 0) 
       goto noNetworksFound;
 
     delay(100); // Probably not needed
-
+    
     // Print out network names
     Serial.printf("%i networks found: \n", networks_found);
-    for (int j = 0; j < min(networks_found, 10); j++) 
+    for (uint8_t j = 0; j < min((int)networks_found, 10); j++) 
       Serial.printf(": %s \n", WiFi.SSID(j));
     if (networks_found > 10)
       Serial.printf("...and %i more", networks_found - 10);
     Serial.print("\n");
 
     // Check networks found in scan for ones provided in network_credentials.h
-    for (int i = 0; i < sizeof(ssid) / sizeof(ssid[0]); i++) {  // Loop through network_credentials.h entries...
-      for (int j = 0; j < networks_found; j++) {  // Loop through scan results...
+    for (uint8_t i = 0; i < sizeof(ssid) / sizeof(ssid[0]); i++) {  // Loop through network_credentials.h entries...
+      for (uint8_t j = 0; j < networks_found; j++) {  // Loop through scan results...
         // When matching entry found, try connecting
         if (WiFi.SSID(j) == ssid[i] && connect_wifi_network(ssid[i], password[i], id[i])) 
           goto wifiConnected;
       }
     }
     // If no networks were found, or none were connected to
-noNetworksFound: 
-    Serial.printf("No networks found. Scanning again in %i seconds. \n", wifi_scan_delay);
-    delay(wifi_scan_delay * 1000);
+  noNetworksFound: 
+    Serial.printf("No networks found. Scanning again in %i seconds. \n", wifi_scan_delay_seconds);
+    delay(wifi_scan_delay_seconds * 1000);
   }
-wifiConnected:
+  wifiConnected:
   Serial.println("\n\nWiFi connected!");
   Serial.print(": IP address: ");  
   Serial.println(WiFi.localIP());
@@ -125,6 +136,10 @@ wifiConnected:
     handle_ledoff();
     request->send(200);
   });
+  server.on("/slider", [](AsyncWebServerRequest *request){
+    handle_slider(request->url().c_str());
+    request->send(200);
+  });
 
   server.begin();
   Serial.println(": HTTP server started. ");
@@ -145,7 +160,7 @@ bool connect_wifi_network(String ssid, String password, String id="") {
 
   // Wait until connected
   Serial.print("Connecting...");
-  for (int m = 1; m <= wifi_connect_timeout_per_network; m++) { 
+  for (uint8_t m = 1; m <= wifi_connect_seconds_timeout_per_network; m++) { 
     // Blink light (takes 1 second)
     flash_led(1, 500, 500);
 
@@ -153,7 +168,7 @@ bool connect_wifi_network(String ssid, String password, String id="") {
       return true;
 
     // Connection timeout
-    else if (m == wifi_connect_timeout_per_network) {
+    else if (m == wifi_connect_seconds_timeout_per_network) {
       Serial.println("");
       Serial.print("WiFi connection timeout. \n");
       WiFi.disconnect();
@@ -168,11 +183,36 @@ bool connect_wifi_network(String ssid, String password, String id="") {
 void handle_ledon() {
   digitalWrite(ONBOARD_LED, HIGH);
   Serial.println("LED turned on. ");
+  
+  // Set the current position to 0
+  stepper.setCurrentPosition(0);
+ 
+  // Run the motor forward at 200 steps/second until the motor reaches 400 steps (2 revolutions)
+  while(stepper.currentPosition() != 400)
+  {
+    stepper.setSpeed(500);
+    stepper.runSpeed();
+  }
 }
 
 void handle_ledoff() {
   digitalWrite(ONBOARD_LED, LOW);
   Serial.println("LED turned off. ");
+ 
+  // Reset the position to 0
+  stepper.setCurrentPosition(0);
+ 
+  // Run the motor backwards at 600 steps/second until the motor reaches -200 steps (1 revolution)
+  while(stepper.currentPosition() != -400) 
+  {
+    stepper.setSpeed(-50);
+    stepper.runSpeed();
+  }
+}
+
+void handle_slider(String url) {
+  uint16_t slider_position = url.substring(-1, 8).toInt(); // Remove '/slider/' from url
+  Serial.printf("Position: %i\n", slider_position);
 }
 
 // Prepares HTML code to send to client, from PCInterface.html
@@ -219,8 +259,8 @@ String SendHTML(){
   return html_string;
 }
 
-void flash_led(int flashes, int on_time, int off_time) {
-  for (int i = 0; i < flashes; i++) {
+void flash_led(uint8_t flashes, uint16_t on_time, uint16_t off_time) {
+  for (uint8_t i = 0; i < flashes; i++) {
       digitalWrite(ONBOARD_LED, HIGH);
       delay(on_time);
       digitalWrite(ONBOARD_LED, LOW);
