@@ -29,9 +29,9 @@
             --indent-shadow: 1px 1px 4px rgba(255, 255, 255, 0), -1px -1px 4px rgba(0, 0, 0, 0), inset -4px -4px 6px rgba(255, 255, 255, 1), inset 4px 4px 6px rgba(0, 0, 0, 0.3);
             --oliver-active-shadow: -5px -5px 8px rgba(255, 255, 255, 1), 5px 5px 8px rgba(0, 0, 0, 0.3), inset -2px -2px 3px rgba(255, 255, 255, 1), inset 2px 2px 3px rgba(0, 0, 0, 0.3);
             /* Round thumb: */
-            --slider-thumb-shadow: inset .4em .4em 5px -8px rgba(255, 255, 255, .5), inset -.4em -.4em 10px -3px rgba(0, 0, 0, 0.3), 0.7em 0.5em 7px -0.5em rgba(0, 0, 0, 0.3), -1px -1px 2px rgba(255, 255, 255, 0.8), 1px 1px 2px rgba(0, 0, 0, 0.3);
+            /* --slider-thumb-shadow: inset .4em .4em 5px -8px rgba(255, 255, 255, .5), inset -.4em -.4em 10px -3px rgba(0, 0, 0, 0.3), 0.7em 0.5em 7px -0.5em rgba(0, 0, 0, 0.3), -1px -1px 2px rgba(255, 255, 255, 0.8), 1px 1px 2px rgba(0, 0, 0, 0.3); */
             /* Flat thumb: */
-            /* --slider-thumb-shadow: -2px -2px 8px rgba(255, 255, 255, 0.5), 2px 2px 4px rgba(0, 0, 0, 0.4), inset 2px 2px 0px rgba(255, 255, 255, 0), inset -2px -2px 0px rgba(0, 0, 0, 0); */
+            --slider-thumb-shadow: -2px -2px 8px rgba(255, 255, 255, 0.5), 2px 2px 4px rgba(0, 0, 0, 0.4), inset 2px 2px 0px rgba(255, 255, 255, 0), inset -2px -2px 0px rgba(0, 0, 0, 0);
             
             --background_color: #F0F0F0;
 
@@ -45,7 +45,6 @@
     height: 100%;
     }
     body {
-        background: #fff;
         padding: 0;
         margin: 0;
         font-family: 'Varela Round', sans-serif;
@@ -196,22 +195,23 @@
         }
 
         .control-ui {
-            /* border: 2px solid #00FF00; */
             position: absolute;
             left: 50%;
             top: 50%;
             transform: translate(-50%, -50%);
             height: fit-content;
             width: min(400px, 100%);
-            /* border: 2px solid #001f3f; */
+            border: 2px solid #001f3f;
             
             /* Setup Grid */
             display: grid;
             grid-template:
                 'auto-btn auto-btn'
                 'down-btn up-btn'
-                'slider slider'
-                'value-box value-box';
+                'sliderPlace sliderPlace'
+                'valuePlace valuePlace'
+                'sliderSpeed sliderSpeed'
+                'valueSpeed valueSpeed';
             grid-gap: 15px;
             grid-auto-columns: minmax(0, 1fr); /* Make columns equal size */
         }
@@ -243,17 +243,17 @@
         }
     
         /*Auto Button*/
-        .auto-btn {
+        #auto-btn {
             grid-area: auto-btn;
         }
     
         /*Down Button*/
-        .down-btn {
+        #down-btn {
             grid-area: down-btn;
         }
 
         /*Up Button*/
-        .up-btn {
+        #up-btn {
             grid-area: up-btn;
         }
     
@@ -293,7 +293,7 @@
         input[type=range]::-moz-range-thumb {
             appearance: none;
             border: none;
-            width: 15%;
+            width: 40px;
             height: 100%;
             background: var(--background_color);
             border-radius: 9999px;
@@ -312,7 +312,12 @@
         input[type="range"]::-webkit-slider-runnable-track:hover {
             box-shadow: -5px -5px 8px rgba(255, 255, 255, 0.6), 5px 5px 10px rgba(0, 0, 0, 0.4), inset 2px -2px 5px rgba(255, 255, 255, 1), inset 2px 2px 4px rgba(0, 0, 0, 0.3);
         } */
-
+        #sliderPlace {
+            grid-area: sliderPlace;
+        }
+        #sliderSpeed {
+            grid-area: sliderSpeed;
+        }
         /*Range Value Label*/
         .value-box {
             display: grid;
@@ -324,12 +329,18 @@
             box-shadow: var(--outdent-shadow);
             transition: all;
             transition-duration: var(--transition-duration);
-            width: 100%;
+            width: calc(50% - var(--margin)/2);
             height: 50px;
-            grid-area: value-box;
             /* Center the stupid thing: */
             margin-left: 200px;
             transform: translateX(-50%)
+        }
+        
+        #valuePlace {
+            grid-area: valuePlace;
+        }
+        #valueSpeed {
+            grid-area: valueSpeed;
         }
 
         /* The switch - the box around the slider */
@@ -419,20 +430,25 @@
     </ul>
   </div>
     <div class="control-ui">
-        <button class="auto-btn" onclick="$.post('/auto')">
+        <button id="auto-btn" onclick="$.post('/auto')">
             <span>Auto</span>
         </button>
-        <button class="down-btn" onclick="$.post('/ledoff')"> 
+        <button id="down-btn" onclick="$.post('/ledoff')"> 
             <span>Down</span>
         </button>
-        <button class="up-btn" onclick="$.post('/ledon')"> 
+        <button id="up-btn" onclick="$.post('/ledon')"> 
             <span>Up</span>
         </button>
-        <input type="range" value="50" min="0" max="100" 
+        <input type="range" id="sliderPlace"value="50" min="0" max="100" 
             oninput="this.nextElementSibling.value = this.value" 
             onmouseup="$.post('/slider/' + this.value)" 
             ontouchend="$.post('/slider/' + this.value)" > <!-- onmouseup for desktop, ontouchend for mobile -->
-        <output class="value-box">50</output>
+        <output class="value-box" id="valuePlace">50</output>
+        <input type="range" id="sliderSpeed" value="69" min="0" max="500" 
+            oninput="this.nextElementSibling.value = this.value" 
+            onmouseup="$.post('/slider/' + this.value)" 
+            ontouchend="$.post('/slider/' + this.value)" > <!-- onmouseup for desktop, ontouchend for mobile -->
+        <output class="value-box" id="valueSpeed">69</output>
     </div>
 </body>
 </html>
