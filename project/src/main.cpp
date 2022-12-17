@@ -26,6 +26,9 @@
  
 // Create a new instance of the AccelStepper class
 AccelStepper stepper = AccelStepper(motorInterfaceType, stepPin, dirPin);
+bool motor_running = false;
+uint16_t motor_speed = 100;
+int8_t motor_direction = 1;
 
 #define ONBOARD_LED  2
 
@@ -45,8 +48,9 @@ bool setup_wifi_success();
 bool connect_wifi_network(String ssid, String password, String id);
 
 void handle_OnConnect();
-void handle_ledon();
-void handle_ledoff();
+void handle_auto();
+void handle_up();
+void handle_down();
 void handle_slider(String url);
 void handle_NotFound();
 
@@ -58,7 +62,7 @@ void setup() {
   Serial.begin(115200);
 
   // Set the maximum motor speed in steps per second
-  stepper.setMaxSpeed(100);
+  stepper.setMaxSpeed(1000);
 
   pinMode(ONBOARD_LED,OUTPUT);
   
@@ -69,6 +73,10 @@ void setup() {
 }
 
 void loop() {
+  if (motor_running) {
+    stepper.setSpeed(motor_speed * motor_direction);
+    stepper.runSpeed();
+  }
 }
 
 bool setup_wifi_success() {
@@ -128,12 +136,16 @@ bool setup_wifi_success() {
   server.on("/home", HTTP_GET, [](AsyncWebServerRequest *request){
     request->send(200, "text/html", SendHTML());
   });
+  server.on("/auto", [](AsyncWebServerRequest *request){
+    handle_auto();
+    request->send(200);
+  });
   server.on("/ledon", [](AsyncWebServerRequest *request){
-    handle_ledon();
+    handle_up();
     request->send(200);
   });
   server.on("/ledoff", [](AsyncWebServerRequest *request){
-    handle_ledoff();
+    handle_down();
     request->send(200);
   });
   server.on("/slider", [](AsyncWebServerRequest *request){
@@ -180,39 +192,33 @@ bool connect_wifi_network(String ssid, String password, String id="") {
   return false;
 }
 
-void handle_ledon() {
-  digitalWrite(ONBOARD_LED, HIGH);
-  Serial.println("LED turned on. ");
-  
-  // Set the current position to 0
-  stepper.setCurrentPosition(0);
- 
-  // Run the motor forward at 200 steps/second until the motor reaches 400 steps (2 revolutions)
-  while(stepper.currentPosition() != 400)
-  {
-    stepper.setSpeed(500);
-    stepper.runSpeed();
-  }
+void handle_auto() {
+  digitalWrite(ONBOARD_LED, LOW);
+  Serial.println("Stopping.");
+  motor_running = false;
 }
 
-void handle_ledoff() {
-  digitalWrite(ONBOARD_LED, LOW);
-  Serial.println("LED turned off. ");
- 
-  // Reset the position to 0
-  stepper.setCurrentPosition(0);
- 
-  // Run the motor backwards at 600 steps/second until the motor reaches -200 steps (1 revolution)
-  while(stepper.currentPosition() != -400) 
-  {
-    stepper.setSpeed(-50);
-    stepper.runSpeed();
-  }
+void handle_up() {
+  digitalWrite(ONBOARD_LED, HIGH);
+  Serial.println("Moving CW");
+  
+  motor_running = true;
+  motor_direction = 1;
+}
+
+void handle_down() {
+  digitalWrite(ONBOARD_LED, HIGH);
+  Serial.println("Moving CCW");
+  
+  motor_running = true;
+  motor_direction = -1;
 }
 
 void handle_slider(String url) {
   uint16_t slider_position = url.substring(-1, 8).toInt(); // Remove '/slider/' from url
   Serial.printf("Position: %i\n", slider_position);
+
+  motor_speed = slider_position;
 }
 
 // Prepares HTML code to send to client, from PCInterface.html
