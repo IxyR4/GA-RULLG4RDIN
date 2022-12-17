@@ -20,14 +20,17 @@
 #include <AccelStepper.h>
  
 // Define stepper motor connections and motor interface type. Motor interface type must be set to 1 when using a driver:
-#define dirPin 22
-#define stepPin 23
+#define dirPin 23
+#define stepPin 22
+#define sleepPin 1
+#define resetPin 3
 #define motorInterfaceType 1
  
 // Create a new instance of the AccelStepper class
 AccelStepper stepper = AccelStepper(motorInterfaceType, stepPin, dirPin);
 bool motor_running = false;
-uint16_t motor_speed = 100;
+uint16_t motor_speed = 1000;
+uint16_t motor_target_speed = 1000;
 int8_t motor_direction = 1;
 
 #define ONBOARD_LED  2
@@ -62,9 +65,14 @@ void setup() {
   Serial.begin(115200);
 
   // Set the maximum motor speed in steps per second
-  stepper.setMaxSpeed(1000);
+  stepper.setMaxSpeed(2000);
 
   pinMode(ONBOARD_LED,OUTPUT);
+  pinMode(resetPin,OUTPUT);
+  pinMode(sleepPin,OUTPUT);
+
+  digitalWrite(resetPin, HIGH);
+  digitalWrite(sleepPin, LOW);
   
   Serial.println("");
 
@@ -75,6 +83,7 @@ void setup() {
 void loop() {
   if (motor_running) {
     stepper.setSpeed(motor_speed * motor_direction);
+    stepper.run();
     stepper.runSpeed();
   }
 }
@@ -193,32 +202,37 @@ bool connect_wifi_network(String ssid, String password, String id="") {
 }
 
 void handle_auto() {
+  digitalWrite(sleepPin, LOW);
   digitalWrite(ONBOARD_LED, LOW);
   Serial.println("Stopping.");
   motor_running = false;
 }
 
 void handle_up() {
+  digitalWrite(sleepPin, HIGH);
   digitalWrite(ONBOARD_LED, HIGH);
   Serial.println("Moving CW");
   
-  motor_running = true;
   motor_direction = 1;
+  motor_running = true;
 }
 
 void handle_down() {
+  digitalWrite(sleepPin, HIGH);
   digitalWrite(ONBOARD_LED, HIGH);
   Serial.println("Moving CCW");
   
-  motor_running = true;
   motor_direction = -1;
+  motor_running = true;
 }
 
 void handle_slider(String url) {
   uint16_t slider_position = url.substring(-1, 8).toInt(); // Remove '/slider/' from url
-  Serial.printf("Position: %i\n", slider_position);
 
-  motor_speed = slider_position;
+  if (motor_speed != slider_position) {
+    Serial.printf("Setting speed: %i\n", slider_position);
+    motor_speed = slider_position;
+  }
 }
 
 // Prepares HTML code to send to client, from PCInterface.html
