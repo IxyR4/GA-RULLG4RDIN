@@ -444,11 +444,11 @@
             onmouseup="$.post('/slider/' + this.value)" 
             ontouchend="$.post('/slider/' + this.value)" > <!-- onmouseup for desktop, ontouchend for mobile -->
         <output class="value-box" id="valuePlace">50</output>
-        <input type="range" id="sliderSpeed" value="69" min="0" max="1000" 
+        <input type="range" id="sliderSpeed" value="1000" min="0" max="2000" step="50"
             oninput="this.nextElementSibling.value = this.value" 
             onmouseup="$.post('/slider/' + this.value)" 
             ontouchend="$.post('/slider/' + this.value)" > <!-- onmouseup for desktop, ontouchend for mobile -->
-        <output class="value-box" id="valueSpeed">69</output>
+        <output class="value-box" id="valueSpeed">1000</output>
     </div>
 </body>
 </html>
