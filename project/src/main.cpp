@@ -20,10 +20,10 @@
 #include <AccelStepper.h>
  
 // Define stepper motor connections and motor interface type. Motor interface type must be set to 1 when using a driver:
-#define dirPin 23
-#define stepPin 22
-#define sleepPin 1
-#define resetPin 3
+#define dirPin 27
+#define stepPin 26
+#define sleepPin 25
+#define resetPin 33
 #define motorInterfaceType 1
  
 // Create a new instance of the AccelStepper class
@@ -64,15 +64,17 @@ void flash_led(uint8_t flashes, uint16_t on_time, uint16_t off_time);
 void setup() {
   Serial.begin(115200);
 
-  // Set the maximum motor speed in steps per second
-  stepper.setMaxSpeed(2000);
-
   pinMode(ONBOARD_LED,OUTPUT);
   pinMode(resetPin,OUTPUT);
-  pinMode(sleepPin,OUTPUT);
+  // pinMode(sleepPin,OUTPUT);
 
   digitalWrite(resetPin, HIGH);
-  digitalWrite(sleepPin, LOW);
+  // digitalWrite(sleepPin, LOW);
+
+  // Set the maximum motor speed in steps per second
+  stepper.setMaxSpeed(2000);
+  stepper.setEnablePin(sleepPin);
+  stepper.disableOutputs();
   
   Serial.println("");
 
@@ -140,7 +142,8 @@ bool setup_wifi_success() {
   // Setup Server //
   // Handle button presses
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){  // Redirect mDNS connections to internal IP due to encountering delays when using mDNS
-    request->redirect("http://" + WiFi.localIP().toString() + "/home");
+    // request->redirect("http://" + WiFi.localIP().toString() + "/home");
+    request->redirect("/home");
   });
   server.on("/home", HTTP_GET, [](AsyncWebServerRequest *request){
     request->send(200, "text/html", SendHTML());
@@ -202,26 +205,29 @@ bool connect_wifi_network(String ssid, String password, String id="") {
 }
 
 void handle_auto() {
-  digitalWrite(sleepPin, LOW);
+  // digitalWrite(sleepPin, LOW);
+  stepper.disableOutputs();
   digitalWrite(ONBOARD_LED, LOW);
   Serial.println("Stopping.");
   motor_running = false;
 }
 
 void handle_up() {
-  digitalWrite(sleepPin, HIGH);
+  stepper.enableOutputs();
   digitalWrite(ONBOARD_LED, HIGH);
   Serial.println("Moving CW");
   
+  delay(10);
   motor_direction = 1;
   motor_running = true;
 }
 
 void handle_down() {
-  digitalWrite(sleepPin, HIGH);
+  stepper.enableOutputs();
   digitalWrite(ONBOARD_LED, HIGH);
   Serial.println("Moving CCW");
   
+  delay(10);
   motor_direction = -1;
   motor_running = true;
 }
