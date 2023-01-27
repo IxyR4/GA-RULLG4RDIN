@@ -16,9 +16,6 @@
 
 #include "SPIFFS.h" // For file system (separate HTML file)
 
-/* Network credentials are stored in network_credentials.h, enter them there */
-#include "network_credentials.h"
-
 #include <AccelStepper.h>
 
 // Define stepper motor connections and motor interface type. Motor interface type must be set to 1 when using a driver:
@@ -27,6 +24,12 @@
 #define sleepPin 25
 #define resetPin 33
 #define motorInterfaceType 1
+
+#define OTA_USERNAME ""
+#define OTA_PASSWORD ""
+
+/* Network credentials are stored in network_credentials.h, enter them there */
+#include "network_credentials.h"
  
 // Create a new instance of the AccelStepper class
 AccelStepper stepper = AccelStepper(motorInterfaceType, stepPin, dirPin);
@@ -167,7 +170,7 @@ bool setup_wifi_success() {
     request->send(200);
   });
 
-  AsyncElegantOTA.begin(&server);    // Start ElegantOTA
+  AsyncElegantOTA.begin(&server, OTA_USERNAME, OTA_PASSWORD);    // Start ElegantOTA
 
   server.begin();
   Serial.println(": HTTP server started. ");
