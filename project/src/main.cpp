@@ -12,13 +12,15 @@
 #include <WiFi.h>
 #include <ESPAsyncWebServer.h>
 #include <ESPmDNS.h>
+#include <AsyncElegantOTA.h>
 
 #include "SPIFFS.h" // For file system (separate HTML file)
 
 /* Network credentials are stored in network_credentials.h, enter them there */
 #include "network_credentials.h"
+
 #include <AccelStepper.h>
- 
+
 // Define stepper motor connections and motor interface type. Motor interface type must be set to 1 when using a driver:
 #define dirPin 27
 #define stepPin 26
@@ -164,6 +166,8 @@ bool setup_wifi_success() {
     handle_slider(request->url().c_str());
     request->send(200);
   });
+
+  AsyncElegantOTA.begin(&server);    // Start ElegantOTA
 
   server.begin();
   Serial.println(": HTTP server started. ");
