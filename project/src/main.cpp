@@ -7,7 +7,7 @@
  * Also used this: https://randomnerdtutorials.com/esp32-vs-code-platformio-spiffs/ (and some other pages on the same website)
  * 
  * 
- * Current state: Can start a web server and allow connected client to control onboard blue LED using up/down buttons on web page
+ * Current state: Can run a web server and allow connected clients to control connected motor position and speed
 
 **********/
 
