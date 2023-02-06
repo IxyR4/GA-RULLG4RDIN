@@ -227,18 +227,9 @@ String SendHTML(){
   
   // Default HTML page, "relic"-ish, useful for when file loading failed
   Serial.println("Failed loading HTML file. Returning default page. ");
-  html_string = "<!DOCTYPE html> <html>\n";
-  html_string +="<head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, user-scalable=no\">\n";
-  html_string +="<style>html { font-family: Helvetica; display: inline-block; margin: 0px auto; text-align: center;}\n";
-  html_string +="body{margin-top: 50px;} h1 {color: #444444;margin: 50px auto 30px;} h3 {color: #444444;margin-bottom: 50px;}\n";
-  html_string +="p {font-size: 14px;color: #888;margin-bottom: 10px;}\n";
-  html_string +="</style>\n";
-  html_string +="</head>\n";
-  html_string +="<body>\n";
-  html_string +="<h1>ESP32 Web Server</h1>\n";
+  html_string = "<style>html { font-family: Helvetica; } </style>\n";
+  html_string +="<h1>ESP32 Web Server</h3>\n";
   html_string +="<h3>Error: No HTML file was loaded</h3>\n";
-  html_string +="</body>\n";
-  html_string +="</html>\n";
 
   return html_string;
 }
