@@ -10,7 +10,7 @@ class Rullgardin {
     public:
     
     // Rullgardin(uint8_t motorInterfaceType, uint8_t stepPin, int8_t dirPin, uint8_t enablePin, uint8_t resetPin) {
-    Rullgardin(int8_t up_direction_ = CW) {
+    Rullgardin() {
         // Create a new instance of the AccelStepper class
         AccelStepper motor = AccelStepper(MOTOR_INTERFACE_TYPE, STEP_PIN, DIR_PIN);
 
@@ -21,11 +21,16 @@ class Rullgardin {
         
         pinMode(RESET_PIN,OUTPUT);
         digitalWrite(RESET_PIN, HIGH);
-
-        up_direction = up_direction_;
     }
 
     bool isRunning() { return running; }
+
+    bool set_up_direction(int8_t direction = CW) {
+        if (direction == 1 || direction == -1) {
+            up_direction = direction;
+            down_direction = direction * -1;
+        }
+    }
 
     bool run() {
         if (running) {
@@ -37,16 +42,12 @@ class Rullgardin {
         return false;
     }
 
-    bool stop() {
+    void stop() {
         motor.disableOutputs();
-        if (running) {
-            running = false;
-            return true;
-        }
-        return false;
+        running = false;
     }
 
-    bool open() {
+    void open() {
         if (running && current_direction != up_direction) {
             stop();
             delay(10);
@@ -54,11 +55,10 @@ class Rullgardin {
         motor.enableOutputs();
         current_direction = up_direction;
         running = true;
-        set_position(100);
-        return false;
+        move_to_position(0);
     }
 
-    bool close() {
+    void close() {
         if (running && current_direction == up_direction) {
             stop();
             delay(10);
@@ -66,15 +66,27 @@ class Rullgardin {
         motor.enableOutputs();
         current_direction = up_direction * -1;
         running = true;
-        set_position(0);
-        return false;
+        move_to_position(100);
     }
 
-    bool set_position(uint8_t position) {
-        return false;
+    // Not currently implemented
+    void move_to_position(uint8_t position) {
+        return;
         motor.enableOutputs();
-        current_direction = 1;
+        motor.moveTo(position * max_steps / 100);
         running = true;
+    }
+
+    void set_current_position_as_top() {
+        motor.setCurrentPosition(0);
+    }
+
+    void set_current_position_as_max() {
+        max_steps = (motor.currentPosition() < theoretical_max_steps ? motor.currentPosition() : theoretical_max_steps); // Minimum
+    }
+
+    void remove_max_position_limit() {
+        max_steps = theoretical_max_steps;
     }
 
     bool set_speed(uint16_t set_speed) {
@@ -90,10 +102,16 @@ class Rullgardin {
     private:
         AccelStepper motor;
         bool running = false;
-        uint16_t speed = 1000;
-        uint16_t target_speed = 1000;
+
+        uint16_t speed = 800;
+        uint16_t target_speed = 800;
+
         int8_t up_direction = CW;
+        int8_t down_direction = CCW;
         int8_t current_direction = CW;
+
+        uint32_t max_steps = 200*4*10;
+        uint32_t theoretical_max_steps = 200*4*100;
 };
 
 #endif
