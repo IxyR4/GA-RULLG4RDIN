@@ -29,7 +29,9 @@ class Rullgardin {
         if (direction == 1 || direction == -1) {
             up_direction = direction;
             down_direction = direction * -1;
+            return true;
         }
+        return false;
     }
 
     bool run() {
