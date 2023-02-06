@@ -78,7 +78,7 @@ class Rullgardin {
     }
 
     bool set_speed(uint16_t set_speed) {
-        if (speed != set_speed) {
+        if (speed != set_speed && 0 < speed < motor.maxSpeed()) {
             speed = set_speed;
             return true;
         } 
