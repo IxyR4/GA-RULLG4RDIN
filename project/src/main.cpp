@@ -1,39 +1,20 @@
+#ifndef MAIN
+#define MAIN
+
 /**********
 
  * Some code copied from: https://lastminuteengineers.com/creating-esp32-web-server-arduino-ide/#configuring-the-esp32-web-server-in-wifi-station-sta-mode 
  * Also used this: https://randomnerdtutorials.com/esp32-vs-code-platformio-spiffs/ (and some other pages on the same website)
  * 
  * 
- * Current state: Can start a web server and allow connected client to control onboard blue LED using up/down buttons on web page
+ * Current state: Can run a web server and allow connected clients to control connected motor position and speed
 
 **********/
 
-#include <Arduino.h>
-#include <WiFi.h>
-#include <ESPAsyncWebServer.h>
-#include <ESPmDNS.h>
-
-#include "SPIFFS.h" // For file system (separate HTML file)
+#include "interface.h"
 
 /* Network credentials are stored in network_credentials.h, enter them there */
-#include "network_credentials.h"
-#include <AccelStepper.h>
- 
-// Define stepper motor connections and motor interface type. Motor interface type must be set to 1 when using a driver:
-#define dirPin 27
-#define stepPin 26
-#define sleepPin 25
-#define resetPin 33
-#define motorInterfaceType 1
- 
-// Create a new instance of the AccelStepper class
-AccelStepper stepper = AccelStepper(motorInterfaceType, stepPin, dirPin);
-bool motor_running = false;
-uint16_t motor_speed = 1000;
-uint16_t motor_target_speed = 1000;
-int8_t motor_direction = 1;
 
-#define ONBOARD_LED  2
 
 const char* ssid[] = WIFI_SSID;
 const char* password[] = WIFI_PASSWORD;
@@ -59,22 +40,14 @@ void handle_NotFound();
 
 String SendHTML();
 
+Rullgardin rullgardin = Rullgardin();
+
 void flash_led(uint8_t flashes, uint16_t on_time, uint16_t off_time);
 
 void setup() {
   Serial.begin(115200);
 
   pinMode(ONBOARD_LED,OUTPUT);
-  pinMode(resetPin,OUTPUT);
-  // pinMode(sleepPin,OUTPUT);
-
-  digitalWrite(resetPin, HIGH);
-  // digitalWrite(sleepPin, LOW);
-
-  // Set the maximum motor speed in steps per second
-  stepper.setMaxSpeed(2000);
-  stepper.setEnablePin(sleepPin);
-  stepper.disableOutputs();
   
   Serial.println("");
 
@@ -83,11 +56,7 @@ void setup() {
 }
 
 void loop() {
-  if (motor_running) {
-    stepper.setSpeed(motor_speed * motor_direction);
-    stepper.run();
-    stepper.runSpeed();
-  }
+  rullgardin.run();
 }
 
 bool setup_wifi_success() {
@@ -165,6 +134,8 @@ bool setup_wifi_success() {
     request->send(200);
   });
 
+  AsyncElegantOTA.begin(&server, OTA_USERNAME, OTA_PASSWORD);    // Start ElegantOTA
+
   server.begin();
   Serial.println(": HTTP server started. ");
 
@@ -205,40 +176,27 @@ bool connect_wifi_network(String ssid, String password, String id="") {
 }
 
 void handle_auto() {
-  // digitalWrite(sleepPin, LOW);
-  stepper.disableOutputs();
+  rullgardin.stop();
   digitalWrite(ONBOARD_LED, LOW);
   Serial.println("Stopping.");
-  motor_running = false;
 }
 
 void handle_up() {
-  stepper.enableOutputs();
+  rullgardin.open();
   digitalWrite(ONBOARD_LED, HIGH);
-  Serial.println("Moving CW");
-  
-  delay(10);
-  motor_direction = 1;
-  motor_running = true;
+  Serial.println("Moving up");
 }
 
 void handle_down() {
-  stepper.enableOutputs();
+  rullgardin.close();
   digitalWrite(ONBOARD_LED, HIGH);
-  Serial.println("Moving CCW");
-  
-  delay(10);
-  motor_direction = -1;
-  motor_running = true;
+  Serial.println("Moving down");
 }
 
 void handle_slider(String url) {
   uint16_t slider_position = url.substring(-1, 8).toInt(); // Remove '/slider/' from url
-
-  if (motor_speed != slider_position) {
-    Serial.printf("Setting speed: %i\n", slider_position);
-    motor_speed = slider_position;
-  }
+  rullgardin.set_speed(slider_position);
+  Serial.printf("Setting speed: %i\n", slider_position);
 }
 
 // Prepares HTML code to send to client, from PCInterface.html
@@ -269,18 +227,9 @@ String SendHTML(){
   
   // Default HTML page, "relic"-ish, useful for when file loading failed
   Serial.println("Failed loading HTML file. Returning default page. ");
-  html_string = "<!DOCTYPE html> <html>\n";
-  html_string +="<head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, user-scalable=no\">\n";
-  html_string +="<style>html { font-family: Helvetica; display: inline-block; margin: 0px auto; text-align: center;}\n";
-  html_string +="body{margin-top: 50px;} h1 {color: #444444;margin: 50px auto 30px;} h3 {color: #444444;margin-bottom: 50px;}\n";
-  html_string +="p {font-size: 14px;color: #888;margin-bottom: 10px;}\n";
-  html_string +="</style>\n";
-  html_string +="</head>\n";
-  html_string +="<body>\n";
-  html_string +="<h1>ESP32 Web Server</h1>\n";
+  html_string = "<style>html { font-family: Helvetica; } </style>\n";
+  html_string +="<h1>ESP32 Web Server</h3>\n";
   html_string +="<h3>Error: No HTML file was loaded</h3>\n";
-  html_string +="</body>\n";
-  html_string +="</html>\n";
 
   return html_string;
 }
@@ -293,3 +242,5 @@ void flash_led(uint8_t flashes, uint16_t on_time, uint16_t off_time) {
       delay(off_time);
   }
 }
+
+#endif
