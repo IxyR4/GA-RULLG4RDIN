@@ -11,6 +11,12 @@
     <script>
         var w = window.innerWidth;
         var h = window.innerHeight;
+        function toggleDarkMode() {
+            var element = document.body;
+            element.classList.toggle("dark-mode");
+        }
+        
+        });
     </script>
     <style>
         
@@ -38,6 +44,18 @@
             --transition-duration: 250ms;
 
             --margin: 15px
+        }
+        .dark-mode {
+            --color1: #000000;
+            --color2: #000000;
+            --color3: #000000;
+            --color4: #000000;
+            --color5: #000000;
+            --outdent-shadow: -5px -5px 8px rgba(255, 255, 255, 1), 5px 5px 8px rgba(0, 0, 0, 0.3), inset 2px 2px 0px rgba(255, 255, 255, 0), inset -2px -2px 0px rgba(0, 0, 0, 0);
+            --outdent-hover-shadow: -8px -8px 8px rgba(255, 255, 255, 1), 8px 8px 10px rgba(0, 0, 0, 0.3);
+            --outdent-active-shadow: -1px -1px 4px rgba(255, 255, 255, 0), 1px 1px 4px rgba(0, 0, 0, 0), inset -2px -2px 5px rgba(255, 255, 255, 1), inset 2px 2px 4px rgba(0, 0, 0, 0.3);
+            --indent-shadow: 1px 1px 4px rgba(255, 255, 255, 0), -1px -1px 4px rgba(0, 0, 0, 0), inset -4px -4px 6px rgba(255, 255, 255, 1), inset 4px 4px 6px rgba(0, 0, 0, 0.3);
+            --oliver-active-shadow: -5px -5px 8px rgba(255, 255, 255, 1), 5px 5px 8px rgba(0, 0, 0, 0.3), inset -2px -2px 3px rgba(255, 255, 255, 1), inset 2px 2px 3px rgba(0, 0, 0, 0.3);
         }
 
         html, body {
@@ -350,7 +368,9 @@
         width: 60px;
         height: 34px;
         }
-
+        switch:checked {
+            toggleDarkMode();
+        }
         /* Hide default HTML checkbox */
         .switch input {
         opacity: 0;
@@ -405,32 +425,43 @@
         .slider.round:before {
         border-radius: 50%;
         }
+        .day {
+            background: #eee;
+            color: black;
+        }
+        .night {
+            background: #333;
+            color: white;
+        }
+
+       
 
     </style>
 </head>
 <body>
     <div class="header"></div>
-  <input type="checkbox" class="openSidebarMenu" id="openSidebarMenu">
-  <label for="openSidebarMenu" class="sidebarIconToggle">
+    <input type="checkbox" class="openSidebarMenu" id="openSidebarMenu">
+    <label for="openSidebarMenu" class="sidebarIconToggle">
     <div class="spinner diagonal part-1"></div>
     <div class="spinner horizontal"></div>
     <div class="spinner diagonal part-2"></div>
-  </label>
-  <div id="sidebarMenu">
-    <ul class="sidebarMenuInner">
-        
-      <li><label class="switch">
-        <input type="checkbox">
-        <span class="slider round"></span>
-      </label></li>
-      <li><a href="https://instagram.com/plavookac" target="_blank">I</a></li>
-      <li><a href="https://twitter.com/plavookac" target="_blank">T</a></li>
-      <li><a href="https://www.youtube.com/channel/UCDfZM0IK6RBgud8HYGFXAJg" target="_blank">YT</a></li>
-      <li><a href="https://www.linkedin.com/in/plavookac/" target="_blank">L</a></li>
-    </ul>
-  </div>
+    </label>
+    <div id="sidebarMenu">
+        <ul class="sidebarMenuInner">
+        <li><label class="switch">
+            <input type="checkbox" id="togDaMo" value="false" name="toggleDarkMode">
+
+            <span class="slider round"></span>
+        </label></li>
+        <li><a href="https://instagram.com/plavookac" target="_blank">I</a></li>
+        <li><a href="https://twitter.com/plavookac" target="_blank">T</a></li>
+        <li><a href="https://www.youtube.com/channel/UCDfZM0IK6RBgud8HYGFXAJg" target="_blank">YT</a></li>
+        <li><a href="https://www.linkedin.com/in/plavookac/" target="_blank">L</a></li>
+        </ul>
+    </div>
+    
     <div class="control-ui">
-        <button id="auto-btn" onclick="$.post('/auto')">
+        <button id="auto-btn" onclick="toggleDarkMode()">
             <span>Auto</span>
         </button>
         <button id="down-btn" onclick="$.post('/ledoff')"> 
@@ -449,6 +480,6 @@
             onmouseup="$.post('/slider/' + this.value)" 
             ontouchend="$.post('/slider/' + this.value)" > <!-- onmouseup for desktop, ontouchend for mobile -->
         <output class="value-box" id="valueSpeed">1000</output>
-    </div>
+</div>
 </body>
 </html>
