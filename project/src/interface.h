@@ -20,6 +20,8 @@
 #include <ESPmDNS.h>
 #include <AsyncElegantOTA.h>
 
+#include <HTTPClient.h>
+
 #include "SPIFFS.h" // For file system (separate HTML file)
 
 

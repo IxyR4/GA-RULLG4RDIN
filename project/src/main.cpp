@@ -15,6 +15,9 @@
 
 /* Network credentials are stored in network_credentials.h, enter them there */
 
+// Remote server, where to upload internal IP
+String serverURL = "http://rullgardin.duckdns.org/update-ip";
+
 
 const char* ssid[] = WIFI_SSID;
 const char* password[] = WIFI_PASSWORD;
@@ -30,6 +33,7 @@ AsyncWebServer  server(80);
 // Pre-declare functions to allow mentioning them before they are defined
 bool setup_wifi_success();
 bool connect_wifi_network(String ssid, String password, String id);
+void send_ip_to_remote_server();
 
 void handle_OnConnect();
 void handle_auto();
@@ -173,6 +177,22 @@ bool connect_wifi_network(String ssid, String password, String id="") {
       Serial.print(".");
   }
   return false;
+}
+
+void send_ip_to_remote_server() {
+  HTTPClient http;
+
+  String serverPath = serverURL + "?newip=" + WiFi.localIP().toString();
+  
+  // Prepare http request
+  http.begin(serverPath.c_str());
+  
+  Serial.println(": Sending http GET request: " + serverPath);
+  int httpResponseCode = http.GET();
+  if (httpResponseCode)
+    Serial.println(": IP uploaded to remote server.");
+  else
+    Serial.println(": Failed to upload IP to remote server.");
 }
 
 void handle_auto() {
