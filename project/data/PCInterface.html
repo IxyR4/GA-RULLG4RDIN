@@ -9,47 +9,60 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js">/* Import Ajax, which allow for using $.post to send data to the ESP */</script> 
     <script>
-        var w = window.innerWidth;
-        var h = window.innerHeight;
-        function toggleDarkMode() {
-            var element = document.body;
-            element.classList.toggle("dark-mode");
-        }
-        
-        const toggle = document.getElementById('toggle');
-        const body = document.body;
-
-        toggle.addEventListener('input', e => {
-            const isChecked = e.target.checked;
-
-            if (isChecked) {
-                body.classList.add('dark-theme');
-            } else {
-                body.classList.remove('dark-theme');
+        var darkmodeTest = false;
+        var r = document.querySelector(':root');
+        function buttonColor() {
+            
+            if(darkmodeTest == false)
+            {
+                darkmodeTest = true;
+                r.style.setProperty('--color1', '#242424');
+                r.style.setProperty('--color2', '#242424');
+                r.style.setProperty('--color3', '#242424');
+                r.style.setProperty('--color4', '#242424');
+                r.style.setProperty('--color5', '#242424');
+                r.style.setProperty('--textColor', '#F0F0F0');
+                r.style.setProperty('--background-color', '#242424');
+                r.style.setProperty('--outdent-shadow', '-5px -5px 8px rgba(23, 255, 55, 1), 5px 5px 8px rgba(0, 0, 0, 0.3), inset 2px 2px 0px rgba(23, 255, 55, 0), inset -2px -2px 0px rgba(0, 0, 0, 0)');
+                r.style.setProperty('--outdent-shadow', '-5px -5px 8px rgba(23, 255, 55, 1), 5px 5px 8px rgba(0, 0, 0, 0.3), inset 2px 2px 0px rgba(23, 255, 55, 0), inset -2px -2px 0px rgba(0, 0, 0, 0)');
+                r.style.setProperty('--outdent-hover-shadow', '-8px -8px 8px rgba(23, 255, 55, 1), 8px 8px 10px rgba(0, 0, 0, 0.3)');
+                r.style.setProperty('--outdent-active-shadow', '-1px -1px 4px rgba(23, 255, 55, 0), 1px 1px 4px rgba(0, 0, 0, 0), inset -2px -2px 5px rgba(23, 255, 55, 1), inset 2px 2px 4px rgba(0, 0, 0, 0.3)');
+                r.style.setProperty('--indent-shadow', '1px 1px 4px rgba(23, 255, 55, 0), -1px -1px 4px rgba(0, 0, 0, 0), inset -4px -4px 6px rgba(23, 255, 55, 1), inset 4px 4px 6px rgba(0, 0, 0, 0.3)');
+                r.style.setProperty('--oliver-active-shadow', '-5px -5px 8px rgba(23, 255, 55, 1), 5px 5px 8px rgba(0, 0, 0, 0.3), inset -2px -2px 3px rgba(23, 255, 55, 1), inset 2px 2px 3px rgba(0, 0, 0, 0.3)');
+                r.style.setProperty('--slider-thumb-shadow', '-5px -5px 8px rgba(23, 255, 55, 1), 5px 5px 8px rgba(0, 0, 0, 0.3), inset -2px -2px 3px rgba(23, 255, 55, 1), inset 2px 2px 3px rgba(0, 0, 0, 0.3)');
             }
-        });
+            else if(darkmodeTest == true) {
+                darkmodeTest = false;
+                r.style.setProperty('--color1', '#6DD3CE');
+                r.style.setProperty('--color2', '#C8E9A0');
+                r.style.setProperty('--color3', '#F7A278');
+                r.style.setProperty('--color4', '#A13D63');
+                r.style.setProperty('--color5', '#351E29');
+                r.style.setProperty('--textColor', '#001f3f');
+                r.style.setProperty('--background-color', '#F0F0F0');
+                r.style.setProperty('--outdent-shadow', '-5px -5px 8px rgba(255, 255, 255, 1), 5px 5px 8px rgba(0, 0, 0, 0.3), inset 2px 2px 0px rgba(255, 255, 255, 0), inset -2px -2px 0px rgba(0, 0, 0, 0)');
+                r.style.setProperty('--outdent-hover-shadow', '-8px -8px 8px rgba(255, 255, 255, 1), 8px 8px 10px rgba(0, 0, 0, 0.3)');
+                r.style.setProperty('--outdent-active-shadow', '-1px -1px 4px rgba(255, 255, 255, 0), 1px 1px 4px rgba(0, 0, 0, 0), inset -2px -2px 5px rgba(255, 255, 255, 1), inset 2px 2px 4px rgba(0, 0, 0, 0.3)');
+                r.style.setProperty('--indent-shadow', '1px 1px 4px rgba(255, 255, 255, 0), -1px -1px 4px rgba(0, 0, 0, 0), inset -4px -4px 6px rgba(255, 255, 255, 1), inset 4px 4px 6px rgba(0, 0, 0, 0.3)');
+                r.style.setProperty('--oliver-active-shadow', '-5px -5px 8px rgba(255, 255, 255, 1), 5px 5px 8px rgba(0, 0, 0, 0.3), inset -2px -2px 3px rgba(255, 255, 255, 1), inset 2px 2px 3px rgba(0, 0, 0, 0.3)');
+                r.style.setProperty('--slider-thumb-shadow', '-5px -5px 8px rgba(255, 255, 255, 1), 5px 5px 8px rgba(0, 0, 0, 0.3), inset -2px -2px 3px rgba(255, 255, 255, 1), inset 2px 2px 3px rgba(0, 0, 0, 0.3)');
+            }
+        }
+
+        
     </script>
     <style>
         
         /* * {
         } */
         /* Variables, they do exist */
-    
-        
-
-    
-
-    body {
-        
-        font-family: 'Muli';
-        font-size: 22px;
-        padding: 0 0;
-        margin: 0;
+    :root {
         --color1: #6DD3CE;
         --color2: #C8E9A0;
         --color3: #F7A278;
         --color4: #A13D63;
         --color5: #351E29;
+        --textColor: #001f3f;
         --outdent-shadow: -5px -5px 8px rgba(255, 255, 255, 1), 5px 5px 8px rgba(0, 0, 0, 0.3), inset 2px 2px 0px rgba(255, 255, 255, 0), inset -2px -2px 0px rgba(0, 0, 0, 0);
         --outdent-hover-shadow: -8px -8px 8px rgba(255, 255, 255, 1), 8px 8px 10px rgba(0, 0, 0, 0.3);
         --outdent-active-shadow: -1px -1px 4px rgba(255, 255, 255, 0), 1px 1px 4px rgba(0, 0, 0, 0), inset -2px -2px 5px rgba(255, 255, 255, 1), inset 2px 2px 4px rgba(0, 0, 0, 0.3);
@@ -59,30 +72,26 @@
         /* --slider-thumb-shadow: inset .4em .4em 5px -8px rgba(255, 255, 255, .5), inset -.4em -.4em 10px -3px rgba(0, 0, 0, 0.3), 0.7em 0.5em 7px -0.5em rgba(0, 0, 0, 0.3), -1px -1px 2px rgba(255, 255, 255, 0.8), 1px 1px 2px rgba(0, 0, 0, 0.3); */
         /* Flat thumb: */
         --slider-thumb-shadow: -2px -2px 8px rgba(255, 255, 255, 0.5), 2px 2px 4px rgba(0, 0, 0, 0.4), inset 2px 2px 0px rgba(255, 255, 255, 0), inset -2px -2px 0px rgba(0, 0, 0, 0);
-        
         --background-color: #F0F0F0;
-
         --transition-duration: 250ms;
-
         --margin: 15px;
-        background: var(--background_color);
     }
-
-    body.dark-theme {
-            --color1: #000000;
-            --color2: #000000;
-            --color3: #000000;
-            --color4: #000000;
-            --color5: #000000;
-            --outdent-shadow: -5px -5px 8px rgba(255, 255, 255, 1), 5px 5px 8px rgba(0, 0, 0, 0.3), inset 2px 2px 0px rgba(255, 255, 255, 0), inset -2px -2px 0px rgba(0, 0, 0, 0);
-            --outdent-hover-shadow: -8px -8px 8px rgba(255, 255, 255, 1), 8px 8px 10px rgba(0, 0, 0, 0.3);
-            --outdent-active-shadow: -1px -1px 4px rgba(255, 255, 255, 0), 1px 1px 4px rgba(0, 0, 0, 0), inset -2px -2px 5px rgba(255, 255, 255, 1), inset 2px 2px 4px rgba(0, 0, 0, 0.3);
-            --indent-shadow: 1px 1px 4px rgba(255, 255, 255, 0), -1px -1px 4px rgba(0, 0, 0, 0), inset -4px -4px 6px rgba(255, 255, 255, 1), inset 4px 4px 6px rgba(0, 0, 0, 0.3);
-            --oliver-active-shadow: -5px -5px 8px rgba(255, 255, 255, 1), 5px 5px 8px rgba(0, 0, 0, 0.3), inset -2px -2px 3px rgba(255, 255, 255, 1), inset 2px 2px 3px rgba(0, 0, 0, 0.3);
-            --background-color: #000000;
-            background: var(--background_color);
-        }
-
+    body{
+        font-family: 'Muli';
+        font-size: 22px;
+        padding: 0 0;
+        margin: 0;
+        transition: var(--transition-duration);
+    }
+    .background {
+        width:100%;
+		height: 100%;
+		z-index: -1;
+		position: absolute;
+    }
+    #bckGrnd {
+        background: var(--background-color);
+    }
     .header {
         display: block;
         margin: 0 auto;
@@ -121,7 +130,7 @@
         width: 250px;
         margin-top: 60px;
         transform: translateX(-250px);
-        transition: transform 250ms ease-in-out;
+        transition: var(--transition-duration) ease-in-out;
         background: linear-gradient(180deg, var(--color1) 0%, var(--color2) 100%);
     }
     .sidebarMenuInner{
@@ -155,12 +164,12 @@
     }
 
     input[type=checkbox] {
-        transition: all 0.3s;
+        transition: all var(--transition-duration);
         box-sizing: border-box;
         display: none;
     }
     .sidebarIconToggle {
-        transition: all 0.3s;
+        transition: all var(--transition-duration);
         box-sizing: border-box;
         cursor: pointer;
         position: absolute;
@@ -173,7 +182,7 @@
         width: 22px;
     }
     .spinner {
-        transition: all 0.3s;
+        transition: all var(--transition-duration);
         box-sizing: border-box;
         position: absolute;
         height: 3px;
@@ -181,7 +190,7 @@
         background-color: #fff;
     }
     .horizontal {
-        transition: all 0.3s;
+        transition: all var(--transition-duration);
         box-sizing: border-box;
         position: relative;
         float: left;
@@ -189,30 +198,30 @@
     }
     .diagonal.part-1 {
         position: relative;
-        transition: all 0.3s;
+        transition: all var(--transition-duration);
         box-sizing: border-box;
         float: left;
     }
     .diagonal.part-2 {
-        transition: all 0.3s;
+        transition: all var(--transition-duration);
         box-sizing: border-box;
         position: relative;
         float: left;
         margin-top: 3px;
     }
     input[type=checkbox]:checked ~ .sidebarIconToggle > .horizontal {
-        transition: all 0.3s;
+        transition: all var(--transition-duration);
         box-sizing: border-box;
         opacity: 0;
     }
     input[type=checkbox]:checked ~ .sidebarIconToggle > .diagonal.part-1 {
-        transition: all 0.3s;
+        transition: all var(--transition-duration);
         box-sizing: border-box;
         transform: rotate(135deg);
         margin-top: 8px;
     }
     input[type=checkbox]:checked ~ .sidebarIconToggle > .diagonal.part-2 {
-        transition: all 0.3s;
+        transition: all var(--transition-duration);
         box-sizing: border-box;
         transform: rotate(-135deg);
         margin-top: -9px;
@@ -235,7 +244,8 @@
                 'sliderPlace sliderPlace'
                 'valuePlace valuePlace'
                 'sliderSpeed sliderSpeed'
-                'valueSpeed valueSpeed';
+                'valueSpeed valueSpeed'
+                'toggle toggle';
             grid-gap: 15px;
             grid-auto-columns: minmax(0, 1fr); /* Make columns equal size */
         }
@@ -243,24 +253,23 @@
 
 
         /*Button Classification*/
-        button {
+        .button {
             background: var(--background-color);
-            color: #001f3f;
+            color: var(--textColor);
             border-radius: 9999px;
             box-shadow: var(--outdent-shadow); 
             border: 0px solid var(--background-color);
             cursor: pointer;
-            transition: all;
-            transition-duration: var(--transition-duration);
+            transition: all var(--transition-duration);
             font-size: 22px;
             height: 50px;
             padding: 0;
         }
-        button:hover {
+        .button:hover {
             box-shadow: var(--outdent-hover-shadow);
         }
     
-        button:active {
+        .button:active {
             box-shadow: var(--oliver-active-shadow);
             border: 3px solid var(--background-color);
             padding-top: 2.5px; /* Shift text down */
@@ -270,7 +279,7 @@
         #auto-btn {
             grid-area: auto-btn;
         }
-    
+
         /*Down Button*/
         #down-btn {
             grid-area: down-btn;
@@ -289,8 +298,7 @@
             border-radius: 9999px;
             padding: 5px 5px;
             margin: 0 0;
-            transition: all;
-            transition-duration: var(--transition-duration);
+            transition: all var(--transition-duration);
             box-shadow: var(--indent-shadow);
             grid-area: slider;
         }
@@ -307,7 +315,7 @@
             border: none;
             width: 40px;
             height: 40px;
-            background: var(--background-color);
+            background: transparent;
             border-radius: 9999px;
             box-shadow: var(--slider-thumb-shadow);
             cursor: pointer;
@@ -319,7 +327,7 @@
             border: none;
             width: 40px;
             height: 100%;
-            background: var(--background-color);
+            background: transparent;
             border-radius: 9999px;
             box-shadow: var(--slider-thumb-shadow);
             cursor: pointer;
@@ -348,11 +356,10 @@
             align-items: center;
             justify-content: center;
             background: var(--background-color);
-            color: #001f3f;
+            color: var(--textColor);
             border-radius: 9999px;
             box-shadow: var(--outdent-shadow);
-            transition: all;
-            transition-duration: var(--transition-duration);
+            transition: all var(--transition-duration);
             width: calc(50% - var(--margin)/2);
             height: 50px;
             /* Center the stupid thing: */
@@ -368,98 +375,51 @@
         }
 
         /* The toggle - the box around the slider */
-        .toggle input[type='checkbox'] {
+        .inputToggle[type='checkbox'] {
             display: none;
+            box-shadow: var(--slider-thumb-shadow);
         }
 
-        .toggle label {
-            background-color: #777;
-            border: 2px solid #555;
+        .labelToggle {
+            background: transparent;
+            border: 2px solid var(--background-color);
             border-radius: 50px;
+            box-shadow: inset 0px 5px 15px rgba(0,0,0,0.4), inset 0px -5px 15px rgba(255,255,255,0.4);
             cursor: pointer;
-            display: inline-block;
+            display: block;
             position: relative;
-            transition: all ease-in-out 0.3s;
+            transition: var(--transition-duration);
             width: 100px;
             height: 50px;
         }
-        .toggle label::after {
-    background-color: #555;
-    border-radius: 50%;
-    content: ' ';
-    cursor: pointer;
-    display: inline-block;
-    position: absolute;
-    left: 2px;
-    top: 2px;
-    transition: all ease-in-out 0.3s;
-    width: 42px;
-    height: 42px;
-}
-.toggle input[type='checkbox']:checked ~ label {
-    background-color: #00a0fc;
-    border-color: #006dc9;
-}
-
-.toggle input[type='checkbox']:checked ~ label::after {
-    background-color: #0054b0;
-    transform: translateX(50px);
-}
-
-        /* The slider */
-        .slider {
-        position: absolute;
+        
+        .labelToggle::after {
+        background: linear-gradient(180deg,#ffcc89,#d8860b);
+        border-radius: 42px;
+        content: ' ';
         cursor: pointer;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background-color: var(--color3);
-        -webkit-transition: .4s;
-        transition: .4s;
-        }
-
-        .slider:before {
+        display: block;
         position: absolute;
-        content: "";
-        height: 26px;
-        width: 26px;
-        left: 4px;
-        bottom: 4px;
-        background-color: white;
-        -webkit-transition: .4s;
-        transition: .4s;
+        top:4px;
+		left:4px;
+        transition: var(--transition-duration);
+		width:42px;
+		height: 42px;
+		box-shadow: 0px 5px 10px rgba(0,0,0,0.2);
         }
-
-        input:checked + .slider {
-        background-color: var(--color5);
+        .inputToggle:checked + label {
+            background: transparent;
         }
-
-        input:focus + .slider {
-        box-shadow: 0 0 1px var(--color5)2196F3;
+        .inputToggle:checked + label::after {
+        left: 96px;
+        transform: translateX(-100%);
+        background: linear-gradient(180deg,#777,#3a3a3a);
         }
-
-        input:checked + .slider:before {
-        -webkit-transform: translateX(26px);
-        -ms-transform: translateX(26px);
-        transform: translateX(26px);
+        .labelToggle:active:after{
+            width: 60px;
         }
-
-        /* Rounded sliders */
-        .slider.round {
-        border-radius: 34px;
-        }
-
-        .slider.round:before {
-        border-radius: 50%;
-        }
-        .day {
-            background: #eee;
-            color: black;
-        }
-        .night {
-            background: #333;
-            color: white;
+        #darkmode-toggle {
+            grid-area: toggle;
         }
 
        
@@ -476,25 +436,33 @@
     </label>
     <div id="sidebarMenu">
         <ul class="sidebarMenuInner">
-        <li><div class="toggle">
-            <input type="checkbox" id="toggle" />
-            <label for="toggle"></label>
-        </div></li>
-        <li><a href="https://instagram.com/plavookac" target="_blank">I</a></li>
-        <li><a href="https://twitter.com/plavookac" target="_blank">T</a></li>
-        <li><a href="https://www.youtube.com/channel/UCDfZM0IK6RBgud8HYGFXAJg" target="_blank">YT</a></li>
-        <li><a href="https://www.linkedin.com/in/plavookac/" target="_blank">L</a></li>
+            <li> 
+                <input class="inputToggle" type="checkbox" id="darkmode-toggle" onclick="buttonColor()"/>
+	            <label class="labelToggle" for="darkmode-toggle"></label>
+            </li>
+            <li>
+                <a href="https://instagram.com/plavookac" target="_blank">I</a>
+            </li>
+            <li>
+                <a href="https://twitter.com/plavookac" target="_blank">T</a>
+            </li>
+            <li>
+                <a href="https://www.youtube.com/channel/UCDfZM0IK6RBgud8HYGFXAJg" target="_blank">YT</a>
+            </li>
+            <li>
+                <a href="https://www.linkedin.com/in/plavookac/" target="_blank">L</a>
+            </li>
         </ul>
     </div>
-    
+    <div class="background" id="bckGrnd"></div>
     <div class="control-ui">
-        <button id="auto-btn" onclick="toggleDarkMode()">
+        <button class="button" id="auto-btn" onclick="buttonColor()">
             <span>Auto</span>
         </button>
-        <button id="down-btn" onclick="$.post('/ledoff')"> 
+        <button class="button" id="down-btn" onclick="$.post('/ledoff')"> 
             <span>Down</span>
         </button>
-        <button id="up-btn" onclick="$.post('/ledon')"> 
+        <button class="button" id="up-btn" onclick="$.post('/ledon')"> 
             <span>Up</span>
         </button>
         <input type="range" id="sliderPlace"value="50" min="0" max="100" 
@@ -507,6 +475,7 @@
             onmouseup="$.post('/slider/' + this.value)" 
             ontouchend="$.post('/slider/' + this.value)" > <!-- onmouseup for desktop, ontouchend for mobile -->
         <output class="value-box" id="valueSpeed">1000</output>
-</div>
+        
+    </div>
 </body>
 </html>
