@@ -8,27 +8,31 @@
 #define RESET_PIN 33
 #define MOTOR_INTERFACE_TYPE 1
 
-#define OTA_USERNAME ""
-#define OTA_PASSWORD ""
-
 #define ONBOARD_LED  2
 
 #include <stdlib.h>
 #include <Arduino.h>
+
+//-- Network related --//
 #include <WiFi.h>
 #include <ESPAsyncWebServer.h>
+//Local mDNS
 #include <ESPmDNS.h>
-#include <AsyncElegantOTA.h>
-
+// HTTP post for rullgardin.duckdns.org
 #include <HTTPClient.h>
+/* Network credentials are stored in network_credentials.h, enter them there */
+#include "network_credentials.h"
 
-#include "SPIFFS.h" // For file system (separate HTML file)
+// File system
+#include "SPIFFS.h"
+
+// OTA updates
+#include <AsyncElegantOTA.h>
+#define OTA_USERNAME ""
+#define OTA_PASSWORD ""
 
 
 #include <AccelStepper.h>
-
-/* Network credentials are stored in network_credentials.h, enter them there */
-#include "network_credentials.h"
 
 #include "rullgardin.h"
 
