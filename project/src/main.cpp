@@ -111,6 +111,8 @@ bool setup_wifi_success() {
     Serial.println(": Error starting mDNS. ");
   else 
     Serial.println(": Also available at: rullgardin.local");
+  
+  send_ip_to_remote_server();
 
   // Setup Server //
   // Handle button presses
