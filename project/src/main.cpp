@@ -11,9 +11,35 @@
 
 **********/
 
-#include "interface.h"
+// #include "interface.h"
+
+#include <stdlib.h>
+#include <Arduino.h>
 
 /* Network credentials are stored in network_credentials.h, enter them there */
+//-- Network related --//
+#include <WiFi.h>
+#include <ESPAsyncWebServer.h>
+//Local mDNS
+#include <ESPmDNS.h>
+// HTTP post for rullgardin.duckdns.org
+#include <HTTPClient.h>
+/* Network credentials are stored in network_credentials.h, enter them there */
+#include "network_credentials.h"
+// Wireless log output
+#include <WebSerial.h>
+
+// OTA updates
+#include <AsyncElegantOTA.h>
+#define OTA_USERNAME ""
+#define OTA_PASSWORD ""
+
+// File system
+#include "SPIFFS.h"
+
+#include "rullgardin.h"
+
+#define ONBOARD_LED  2
 
 // Remote server, where to upload internal IP
 String serverURL = "http://rullgardin.duckdns.org/update-ip";
@@ -28,6 +54,8 @@ const uint8_t wifi_connect_seconds_timeout_per_network = 10; // Seconds
 const uint8_t wifi_scan_tries = 2; // How many scans it should do before giving up
 const uint8_t wifi_scan_delay_seconds = 5; // How long to wait between scans
 
+bool darkMode = false;
+
 AsyncWebServer  server(80);
 
 // Pre-declare functions to allow mentioning them before they are defined
@@ -41,8 +69,13 @@ void handle_up();
 void handle_down();
 void handle_slider(String url);
 void handle_NotFound();
+void recvMsg(uint8_t *data, size_t len);
 
 String SendHTML();
+
+void darkmode_on();
+void darkmode_off();
+bool get_dark_mode();
 
 Rullgardin rullgardin = Rullgardin();
 
@@ -61,6 +94,8 @@ void setup() {
 
 void loop() {
   rullgardin.run();
+  
+  // WebSerial.println("Hello!");
 }
 
 bool setup_wifi_success() {
@@ -139,13 +174,36 @@ bool setup_wifi_success() {
     handle_slider(request->url().c_str());
     request->send(200);
   });
+  server.on("/darkmode_on", [](AsyncWebServerRequest *request){
+    darkmode_on();
+    request->send(200);
+  });
+  server.on("/darkmode_off", [](AsyncWebServerRequest *request){
+    darkmode_off();
+    request->send(200);
+  });
+  server.on("/get_dark_mode", HTTP_GET, [](AsyncWebServerRequest *request){
+    request->send(200, "text/html", (get_dark_mode() ? "true" : "false"));
+  });
 
   AsyncElegantOTA.begin(&server, OTA_USERNAME, OTA_PASSWORD);    // Start ElegantOTA
+  
+  WebSerial.begin(&server);
+  WebSerial.msgCallback(recvMsg);
 
   server.begin();
   Serial.println(": HTTP server started. ");
 
   return true;
+}
+
+void recvMsg(uint8_t *data, size_t len){
+  WebSerial.println("Received Data...");
+  String d = "";
+  for(int i=0; i < len; i++){
+    d += char(data[i]);
+  }
+  WebSerial.println(d);
 }
 
 bool connect_wifi_network(String ssid, String password, String id="") {
@@ -220,6 +278,10 @@ void handle_slider(String url) {
   rullgardin.set_speed(slider_position);
   Serial.printf("Setting speed: %i\n", slider_position);
 }
+
+void darkmode_on() {darkMode = true;}
+void darkmode_off() {darkMode = false;}
+bool get_dark_mode() {return darkMode;}
 
 // Prepares HTML code to send to client, from PCInterface.html
 String SendHTML(){
