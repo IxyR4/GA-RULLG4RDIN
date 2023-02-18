@@ -16,6 +16,7 @@
 #include <stdlib.h>
 #include <Arduino.h>
 
+#include "multiLog.h"
 /* Network credentials are stored in network_credentials.h, enter them there */
 //-- Network related --//
 #include <WiFi.h>
@@ -58,6 +59,8 @@ bool darkMode = false;
 
 AsyncWebServer  server(80);
 
+MultiLogger multiLog;
+
 // Pre-declare functions to allow mentioning them before they are defined
 bool setup_wifi_success();
 bool connect_wifi_network(String ssid, String password, String id);
@@ -86,16 +89,16 @@ void setup() {
 
   pinMode(ONBOARD_LED,OUTPUT);
   
-  Serial.println("");
+  multiLog.println("");
 
   if (!setup_wifi_success())
-    Serial.println("Network connection failed, continuing in offline mode (which is the exact same thing as online mode).");
+    multiLog.println("Network connection failed, continuing in offline mode (which is the exact same thing as online mode).");
 }
 
 void loop() {
   rullgardin.run();
   
-  // WebSerial.println("Hello!");
+  // multiLog.println("Hello!");
 }
 
 bool setup_wifi_success() {
@@ -105,7 +108,7 @@ bool setup_wifi_success() {
 
   // Do up to wifi_scan_tries scans
   for (uint8_t s = 0; s < wifi_scan_tries; s++) {
-    Serial.println("Scanning for available WiFi networks... ");
+    multiLog.println("Scanning for available WiFi networks... ");
     flash_led(2, 100, 100);
 
     uint8_t networks_found = WiFi.scanNetworks();
@@ -116,12 +119,12 @@ bool setup_wifi_success() {
     delay(100); // Probably not needed
     
     // Print out network names
-    Serial.printf("%i networks found: \n", networks_found);
-    for (uint8_t j = 0; j < min((int)networks_found, 10); j++) 
-      Serial.printf(": %s \n", WiFi.SSID(j));
+    multiLog.print(networks_found + " networks found: ");
+    for (uint8_t j = 0; j < min((int)networks_found, 10); j++)
+      multiLog.println(": " + WiFi.SSID(j));
     if (networks_found > 10)
-      Serial.printf("...and %i more", networks_found - 10);
-    Serial.print("\n");
+      multiLog.print("...and " + String(networks_found - 10) + " more");
+    multiLog.print("\n");
 
     // Check networks found in scan for ones provided in network_credentials.h
     for (uint8_t i = 0; i < sizeof(ssid) / sizeof(ssid[0]); i++) {  // Loop through network_credentials.h entries...
@@ -133,19 +136,19 @@ bool setup_wifi_success() {
     }
     // If no networks were found, or none were connected to
   noNetworksFound: 
-    Serial.printf("No networks found. Scanning again in %i seconds. \n", wifi_scan_delay_seconds);
+    multiLog.print("No networks found. Scanning again in " + String(wifi_scan_delay_seconds) + " seconds.");
     delay(wifi_scan_delay_seconds * 1000);
   }
   wifiConnected:
-  Serial.println("\n\nWiFi connected!");
-  Serial.print(": IP address: ");  
-  Serial.println(WiFi.localIP());
+  multiLog.println("\n\nWiFi connected!");
+  multiLog.print(": IP address: ");  
+  multiLog.println(WiFi.localIP());
   flash_led(3, 100, 100);
   
   if(!MDNS.begin("rullgardin")) 
-    Serial.println(": Error starting mDNS. ");
+    multiLog.println(": Error starting mDNS. ");
   else 
-    Serial.println(": Also available at: rullgardin.local");
+    multiLog.println(": Also available at: rullgardin.local");
   
   send_ip_to_remote_server();
 
@@ -190,35 +193,36 @@ bool setup_wifi_success() {
   
   WebSerial.begin(&server);
   WebSerial.msgCallback(recvMsg);
+  multiLog.set_web_serial(true);
 
   server.begin();
-  Serial.println(": HTTP server started. ");
+  multiLog.println(": HTTP server started. ");
 
   return true;
 }
 
 void recvMsg(uint8_t *data, size_t len){
-  WebSerial.println("Received Data...");
+  multiLog.println("Received Data...");
   String d = "";
   for(int i=0; i < len; i++){
     d += char(data[i]);
   }
-  WebSerial.println(d);
+  multiLog.println(d);
 }
 
 bool connect_wifi_network(String ssid, String password, String id="") {
   if (id != "") { // Skolans nät (som kräver användarnamn (id) + lösen)
-    Serial.print("Connecting to WPA2 network: "); 
+    multiLog.print("Connecting to WPA2 network: "); 
     WiFi.begin(ssid.c_str(), WPA2_AUTH_PEAP, "", id.c_str(), password.c_str());
   } else {
     // Connect to provided WiFi network
-    Serial.print("Connecting to: ");
+    multiLog.print("Connecting to: ");
     WiFi.begin(ssid.c_str(), password.c_str());
   }
-  Serial.println(ssid.c_str());
+  multiLog.println(ssid.c_str());
 
   // Wait until connected
-  Serial.print("Connecting...");
+  multiLog.print("Connecting...");
   for (uint8_t m = 1; m <= wifi_connect_seconds_timeout_per_network; m++) { 
     // Blink light (takes 1 second)
     flash_led(1, 500, 500);
@@ -228,13 +232,13 @@ bool connect_wifi_network(String ssid, String password, String id="") {
 
     // Connection timeout
     else if (m == wifi_connect_seconds_timeout_per_network) {
-      Serial.println("");
-      Serial.print("WiFi connection timeout. \n");
+      multiLog.println("");
+      multiLog.print("WiFi connection timeout. \n");
       WiFi.disconnect();
       delay(1000);
       return false;
     } else  // Keep waiting
-      Serial.print(".");
+      multiLog.print(".");
   }
   return false;
 }
@@ -247,36 +251,36 @@ void send_ip_to_remote_server() {
   // Prepare http request
   http.begin(serverPath.c_str());
   
-  Serial.println(": Sending http GET request: " + serverPath);
+  multiLog.println(": Sending http GET request: " + serverPath);
   int httpResponseCode = http.GET();
   if (httpResponseCode)
-    Serial.println(": IP uploaded to remote server.");
+    multiLog.println(": IP uploaded to remote server.");
   else
-    Serial.println(": Failed to upload IP to remote server.");
+    multiLog.println(": Failed to upload IP to remote server.");
 }
 
 void handle_auto() {
   rullgardin.stop();
   digitalWrite(ONBOARD_LED, LOW);
-  Serial.println("Stopping.");
+  multiLog.println("Stopping.");
 }
 
 void handle_up() {
   rullgardin.open();
   digitalWrite(ONBOARD_LED, HIGH);
-  Serial.println("Moving up");
+  multiLog.println("Moving up");
 }
 
 void handle_down() {
   rullgardin.close();
   digitalWrite(ONBOARD_LED, HIGH);
-  Serial.println("Moving down");
+  multiLog.println("Moving down");
 }
 
 void handle_slider(String url) {
   uint16_t slider_position = url.substring(-1, 8).toInt(); // Remove '/slider/' from url
   rullgardin.set_speed(slider_position);
-  Serial.printf("Setting speed: %i\n", slider_position);
+  multiLog.println("Setting speed: " + slider_position);
 }
 
 void darkmode_on() {darkMode = true;}
@@ -288,7 +292,7 @@ String SendHTML(){
 
   // Mount HTML file
   if(!SPIFFS.begin(true)){
-    Serial.println("An Error has occurred while mounting SPIFFS");
+    multiLog.println("An Error has occurred while mounting SPIFFS");
     return "";
   }
 
@@ -297,7 +301,7 @@ String SendHTML(){
 
   // Read HTML file to string
   if(!html_file){
-    Serial.println("Failed to open file for reading");
+    multiLog.println("Failed to open file for reading");
   } else {
     while(html_file.available()){
       html_string += (char)html_file.read();
@@ -310,7 +314,7 @@ String SendHTML(){
     return html_string;
   
   // Default HTML page, "relic"-ish, useful for when file loading failed
-  Serial.println("Failed loading HTML file. Returning default page. ");
+  multiLog.println("Failed loading HTML file. Returning default page. ");
   html_string = "<style>html { font-family: Helvetica; } </style>\n";
   html_string +="<h1>ESP32 Web Server</h3>\n";
   html_string +="<h3>Error: No HTML file was loaded</h3>\n";
