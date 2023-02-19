@@ -57,6 +57,8 @@ const uint8_t wifi_scan_delay_seconds = 5; // How long to wait between scans
 
 bool darkMode = false;
 
+bool debug = true;
+
 AsyncWebServer  server(80);
 
 MultiLogger multiLog;
@@ -142,7 +144,7 @@ bool setup_wifi_success() {
   wifiConnected:
   multiLog.println("\n\nWiFi connected!");
   multiLog.print(": IP address: ");  
-  multiLog.println(WiFi.localIP());
+  multiLog.println(WiFi.localIP().toString());
   flash_led(3, 100, 100);
   
   if(!MDNS.begin("rullgardin")) 
@@ -323,6 +325,9 @@ String SendHTML(){
 }
 
 void flash_led(uint8_t flashes, uint16_t on_time, uint16_t off_time) {
+  if (debug)
+    multiLog.println("Flashing LED");
+
   for (uint8_t i = 0; i < flashes; i++) {
       digitalWrite(ONBOARD_LED, HIGH);
       delay(on_time);

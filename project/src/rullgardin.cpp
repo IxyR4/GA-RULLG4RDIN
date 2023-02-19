@@ -5,6 +5,10 @@
 // #define CCW -1
 
 #include "rullgardin.h"
+#include "multiLog.h"
+
+extern MultiLogger multiLog;
+extern bool debug;
 
 // Rullgardin(uint8_t motorInterfaceType, uint8_t stepPin, int8_t dirPin, uint8_t enablePin, uint8_t resetPin) {
 Rullgardin::Rullgardin() {
@@ -32,9 +36,18 @@ bool Rullgardin::set_up_direction(int8_t direction) {
 }
 
 bool Rullgardin::run() {
+    // if (debug) {
+    //     static int loops_since_running_logged = 0;
+    //     if (loops_since_running_logged >= 1000) {
+    //         multiLog.println("Running: " + String(running) + ", position: " + String(motor.currentPosition()));
+    //     } else {
+    //         loops_since_running_logged++;
+    //     }
+    // }
+
     if (running) {
         motor.setSpeed(speed * current_direction);
-        motor.run();
+        // motor.run();
         motor.runSpeed();
         return true;
     }
@@ -43,6 +56,8 @@ bool Rullgardin::run() {
 
 void Rullgardin::stop() {
     motor.disableOutputs();
+    if (debug)
+        multiLog.println("Stopping motor in stop()");
     running = false;
 }
 
@@ -54,6 +69,8 @@ void Rullgardin::open() {
     motor.enableOutputs();
     current_direction = up_direction;
     running = true;
+    if (debug)
+        multiLog.println("Starting motor in open()");
     move_to_position(0);
 }
 
@@ -65,6 +82,8 @@ void Rullgardin::close() {
     motor.enableOutputs();
     current_direction = up_direction * -1;
     running = true;
+    if (debug)
+        multiLog.println("Starting motor in close()");
     move_to_position(100);
 }
 
@@ -73,6 +92,8 @@ void Rullgardin::move_to_position(uint8_t position) {
     return;
     motor.enableOutputs();
     motor.moveTo(position * max_steps / 100);
+    if (debug)
+        multiLog.println("Starting motor in move_to_position()");
     running = true;
 }
 
