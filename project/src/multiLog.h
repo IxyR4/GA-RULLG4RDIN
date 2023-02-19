@@ -4,7 +4,7 @@
 
 class MultiLogger{
 public:
-    void set_web_serial(bool state);
+    void set_web_serial_enabled(bool state);
 
     // Print
 

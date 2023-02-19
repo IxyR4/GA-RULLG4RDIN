@@ -1,6 +1,6 @@
 #include "multiLog.h"
 
-void MultiLogger::set_web_serial(bool state) {
+void MultiLogger::set_web_serial_enabled(bool state) {
     WebSerialEnabled = state;
 }
 

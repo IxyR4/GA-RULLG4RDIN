@@ -193,7 +193,7 @@ bool setup_wifi_success() {
   
   WebSerial.begin(&server);
   WebSerial.msgCallback(recvMsg);
-  multiLog.set_web_serial(true);
+  multiLog.set_web_serial_enabled(true);
 
   server.begin();
   multiLog.println(": HTTP server started. ");
