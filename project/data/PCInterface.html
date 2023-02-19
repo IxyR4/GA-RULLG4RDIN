@@ -11,11 +11,42 @@
     <script>
         var darkmodeTest = false;
         var r = document.querySelector(':root');
-        function buttonColor() {
-            
-            if(darkmodeTest == false)
+
+        function checkCookies() {
+            if(getCookie("darkMode") == null)
             {
-                darkmodeTest = true;
+                setCookie("darkMode", "false");
+            }
+
+            updatePageDarkMode();
+        }
+
+        function setCookie(key, value) {
+            var expires = new Date();
+            expires.setTime(expires.getTime() + (365 * 24 * 60 * 60 * 1000));
+            document.cookie = key + '=' + value + ';expires=' + expires.toUTCString();
+        }
+
+        function getCookie(key) {
+            var keyValue = document.cookie.match('(^|;) ?' + key + '=([^;]*)(;|$)');
+            return keyValue ? keyValue[2] : null;
+        }
+
+        function toggleDarkMode() {
+            if(getCookie("darkMode") == "false")
+            {
+                setCookie("darkMode", "true")
+            } else {
+                setCookie("darkMode", "false")
+            }
+
+            updatePageDarkMode();
+        }
+
+        function updatePageDarkMode() {
+
+            if(getCookie("darkMode") == "true")
+            {
                 r.style.setProperty('--color1', '#261627');
                 r.style.setProperty('--color2', '#123059');
                 r.style.setProperty('--color3', '#123059');
@@ -31,8 +62,8 @@
                 r.style.setProperty('--oliver-active-shadow', '-5px -5px 8px rgba(51, 51, 76, 1), 5px 5px 8px rgba(0, 0, 0, 0.3), inset -2px -2px 3px rgba(51, 51, 76, 1), inset 2px 2px 3px rgba(0, 0, 0, 0.3)');
                 r.style.setProperty('--slider-thumb-shadow', '-5px -5px 8px rgba(51, 51, 76, 1), 5px 5px 8px rgba(0, 0, 0, 0.3), inset -2px -2px 3px rgba(51, 51, 76, 1), inset 2px 2px 3px rgba(0, 0, 0, 0.3)');
             }
-            else if(darkmodeTest == true) {
-                darkmodeTest = false;
+            else if(getCookie("darkMode") == "false")
+            {
                 r.style.setProperty('--color1', '#6DD3CE');
                 r.style.setProperty('--color2', '#C8E9A0');
                 r.style.setProperty('--color3', '#F7A278');
@@ -426,7 +457,7 @@
 
     </style>
 </head>
-<body>
+<body onload="checkCookies()">
     <div class="header"></div>
     <input type="checkbox" class="openSidebarMenu" id="openSidebarMenu">
     <label for="openSidebarMenu" class="sidebarIconToggle">
@@ -437,7 +468,7 @@
     <div id="sidebarMenu">
         <ul class="sidebarMenuInner">
             <li> 
-                <input class="inputToggle" type="checkbox" id="darkmode-toggle" onclick="buttonColor()"/>
+                <input class="inputToggle" type="checkbox" id="darkmode-toggle" onclick="toggleDarkMode()"/>
 	            <label class="labelToggle" for="darkmode-toggle"></label>
             </li>
             <li>
