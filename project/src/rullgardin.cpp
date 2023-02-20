@@ -35,29 +35,28 @@ bool Rullgardin::set_up_direction(int8_t direction) {
     return false;
 }
 
-bool Rullgardin::run() {
-    // if (debug) {
-    //     static int loops_since_running_logged = 0;
-    //     if (loops_since_running_logged >= 1000) {
-    //         multiLog.println("Running: " + String(running) + ", position: " + String(motor.currentPosition()));
-    //     } else {
-    //         loops_since_running_logged++;
-    //     }
-    // }
+void Rullgardin::run() {
+    #if debug
+        static int loops_since_running_logged = 0;
+        if (loops_since_running_logged >= 500) {
+            multiLog.println("Running: " + String(running) + ", position: " + String(motor.currentPosition()));
+        } else {
+            loops_since_running_logged++;
+        }
+    #endif
 
     if (running) {
         motor.setSpeed(speed * current_direction);
         // motor.run();
         motor.runSpeed();
-        return true;
     }
-    return false;
 }
 
 void Rullgardin::stop() {
     motor.disableOutputs();
-    if (debug)
+    #if debug
         multiLog.println("Stopping motor in stop()");
+    #endif
     running = false;
 }
 
@@ -69,8 +68,9 @@ void Rullgardin::open() {
     motor.enableOutputs();
     current_direction = up_direction;
     running = true;
-    if (debug)
+    #if debug
         multiLog.println("Starting motor in open()");
+    #endif
     move_to_position(0);
 }
 
@@ -82,8 +82,9 @@ void Rullgardin::close() {
     motor.enableOutputs();
     current_direction = up_direction * -1;
     running = true;
-    if (debug)
+    #if debug
         multiLog.println("Starting motor in close()");
+    #endif
     move_to_position(100);
 }
 
@@ -92,8 +93,9 @@ void Rullgardin::move_to_position(uint8_t position) {
     return;
     motor.enableOutputs();
     motor.moveTo(position * max_steps / 100);
-    if (debug)
+    #if debug
         multiLog.println("Starting motor in move_to_position()");
+    #endif
     running = true;
 }
 

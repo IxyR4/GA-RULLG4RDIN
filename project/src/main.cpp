@@ -57,7 +57,7 @@ const uint8_t wifi_scan_delay_seconds = 5; // How long to wait between scans
 
 bool darkMode = false;
 
-bool debug = true;
+const bool debug = true;
 
 AsyncWebServer  server(80);
 
@@ -325,8 +325,9 @@ String SendHTML(){
 }
 
 void flash_led(uint8_t flashes, uint16_t on_time, uint16_t off_time) {
-  if (debug)
+  #if debug
     multiLog.println("Flashing LED");
+  #endif
 
   for (uint8_t i = 0; i < flashes; i++) {
       digitalWrite(ONBOARD_LED, HIGH);
