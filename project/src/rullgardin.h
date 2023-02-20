@@ -33,7 +33,8 @@ public:
 
     void close();
 
-    // Not currently implemented
+    int get_position();
+
     void move_to_position(uint8_t position);
 
     void set_current_position_as_top();

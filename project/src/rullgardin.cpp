@@ -17,7 +17,7 @@ Rullgardin::Rullgardin() {
     // Set the maximum motor speed in steps per second
     motor.setMaxSpeed(2000);
     motor.setEnablePin(ENABLE_PIN);
-    motor.setAcceleration(3200);
+    motor.setAcceleration(6400);
     motor.disableOutputs();
     
     pinMode(RESET_PIN,OUTPUT);
@@ -97,7 +97,10 @@ void Rullgardin::close() {
     move_to_position(100);
 }
 
-// Not currently implemented
+int Rullgardin::get_position() {
+    return int(motor.currentPosition() / max_steps * 100);
+}
+
 void Rullgardin::move_to_position(uint8_t in_position) {
     int target_position_raw = in_position * max_steps / 100;
     multiLog.println("Running from position: " + String(motor.currentPosition()) + ", to position: " + String(target_position_raw));
