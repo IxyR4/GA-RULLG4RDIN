@@ -50,7 +50,7 @@ private:
     bool running = false;
 
     uint16_t speed = 800;
-    uint16_t target_speed = 800;
+    uint16_t hard_max_speed = 9001;
 
     int8_t up_direction = CW;
     int8_t down_direction = CCW;

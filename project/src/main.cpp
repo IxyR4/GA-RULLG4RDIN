@@ -98,9 +98,11 @@ void setup() {
 }
 
 void loop() {
-  rullgardin.run();
-  
-  // multiLog.println("Hello!");
+  if (rullgardin.run()) {
+    digitalWrite(ONBOARD_LED, HIGH);
+  } else {
+    digitalWrite(ONBOARD_LED, LOW);
+  }
 }
 
 bool setup_wifi_success() {
@@ -263,19 +265,16 @@ void send_ip_to_remote_server() {
 
 void handle_auto() {
   rullgardin.stop();
-  digitalWrite(ONBOARD_LED, LOW);
   multiLog.println("Stopping.");
 }
 
 void handle_up() {
   rullgardin.open();
-  digitalWrite(ONBOARD_LED, HIGH);
   multiLog.println("Moving up");
 }
 
 void handle_down() {
   rullgardin.close();
-  digitalWrite(ONBOARD_LED, HIGH);
   multiLog.println("Moving down");
 }
 

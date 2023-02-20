@@ -17,6 +17,7 @@ Rullgardin::Rullgardin() {
     // Set the maximum motor speed in steps per second
     motor.setMaxSpeed(2000);
     motor.setEnablePin(ENABLE_PIN);
+    motor.setAcceleration(3200);
     motor.disableOutputs();
     
     pinMode(RESET_PIN,OUTPUT);
@@ -36,7 +37,7 @@ bool Rullgardin::set_up_direction(int8_t direction) {
 
 bool Rullgardin::run() {
 
-    if (running) {
+    if (motor.isRunning()) {
         // #if DEBUG
         //     static int loops_since_running_logged = 0;
         //     if (loops_since_running_logged >= 500) {
@@ -45,26 +46,36 @@ bool Rullgardin::run() {
         //         loops_since_running_logged++;
         //     }
         // #endif
-        motor.setSpeed(speed * current_direction);
-        motor.runSpeed();
+        // motor.setSpeed(speed * current_direction);
+
+        motor.enableOutputs();
+
+        if (!motor.run()) {
+            stop();
+            multiLog.println("Motor reached target position: " + String(motor.currentPosition()));
+        }
+
         return true;
+    } else {
+        motor.disableOutputs();
+        return false;
     }
-    return false;
 }
 
 void Rullgardin::stop() {
-    motor.disableOutputs();
+    motor.stop();
     #if DEBUG
         multiLog.println("Stopping motor in stop()");
     #endif
     running = false;
+    multiLog.println("Motor stopped at position: " + String(motor.currentPosition()));
 }
 
 void Rullgardin::open() {
     if (running && current_direction != up_direction) {
         stop();
     }
-    motor.enableOutputs();
+    // motor.enableOutputs();
     current_direction = up_direction;
     running = true;
     #if DEBUG
@@ -77,7 +88,7 @@ void Rullgardin::close() {
     if (running && current_direction == up_direction) {
         stop();
     }
-    motor.enableOutputs();
+    // motor.enableOutputs();
     current_direction = down_direction;
     running = true;
     #if DEBUG
@@ -87,10 +98,11 @@ void Rullgardin::close() {
 }
 
 // Not currently implemented
-void Rullgardin::move_to_position(uint8_t position) {
-    return;
-    motor.enableOutputs();
-    motor.moveTo(position * max_steps / 100);
+void Rullgardin::move_to_position(uint8_t in_position) {
+    int target_position_raw = in_position * max_steps / 100;
+    multiLog.println("Running from position: " + String(motor.currentPosition()) + ", to position: " + String(target_position_raw));
+    // motor.enableOutputs();
+    motor.moveTo(target_position_raw);
     #if DEBUG
         multiLog.println("Starting motor in move_to_position()");
     #endif
@@ -114,8 +126,9 @@ bool Rullgardin::set_speed(uint16_t new_speed) {
         multiLog.println("speed: " + String(speed) + ", new_speed: " + String(new_speed));
     #endif
 
-    if (speed != new_speed && 0 < new_speed && new_speed <= motor.maxSpeed()) {
+    if (speed != new_speed && 0 < new_speed && new_speed <= hard_max_speed) {
         speed = new_speed;
+        motor.setMaxSpeed(new_speed);
         return true;
     } 
     else 
