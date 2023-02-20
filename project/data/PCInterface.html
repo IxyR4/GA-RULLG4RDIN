@@ -41,6 +41,7 @@
             }
 
             updatePageDarkMode();
+            r.style.setProperty('--transition-duration', '250ms');
         }
 
         function updatePageDarkMode() {
@@ -61,6 +62,9 @@
                 r.style.setProperty('--indent-shadow', '1px 1px 4px rgba(51, 51, 76, 0), -1px -1px 4px rgba(0, 0, 0, 0), inset -4px -4px 6px rgba(51, 51, 76, 1), inset 4px 4px 6px rgba(0, 0, 0, 0.3)');
                 r.style.setProperty('--oliver-active-shadow', '-5px -5px 8px rgba(51, 51, 76, 1), 5px 5px 8px rgba(0, 0, 0, 0.3), inset -2px -2px 3px rgba(51, 51, 76, 1), inset 2px 2px 3px rgba(0, 0, 0, 0.3)');
                 r.style.setProperty('--slider-thumb-shadow', '-5px -5px 8px rgba(51, 51, 76, 1), 5px 5px 8px rgba(0, 0, 0, 0.3), inset -2px -2px 3px rgba(51, 51, 76, 1), inset 2px 2px 3px rgba(0, 0, 0, 0.3)');
+                r.style.setProperty('--toggleDM-gradient-color', 'linear-gradient(180deg,#777,#3a3a3a)');
+                r.style.setProperty('--toggleDM-position-left', '96px');
+                r.style.setProperty('--toggleDM-transform', 'translateX(-100%)');
             }
             else if(getCookie("darkMode") == "false")
             {
@@ -77,9 +81,12 @@
                 r.style.setProperty('--indent-shadow', '1px 1px 4px rgba(255, 255, 255, 0), -1px -1px 4px rgba(0, 0, 0, 0), inset -4px -4px 6px rgba(255, 255, 255, 1), inset 4px 4px 6px rgba(0, 0, 0, 0.3)');
                 r.style.setProperty('--oliver-active-shadow', '-5px -5px 8px rgba(255, 255, 255, 1), 5px 5px 8px rgba(0, 0, 0, 0.3), inset -2px -2px 3px rgba(255, 255, 255, 1), inset 2px 2px 3px rgba(0, 0, 0, 0.3)');
                 r.style.setProperty('--slider-thumb-shadow', '-5px -5px 8px rgba(255, 255, 255, 1), 5px 5px 8px rgba(0, 0, 0, 0.3), inset -2px -2px 3px rgba(255, 255, 255, 1), inset 2px 2px 3px rgba(0, 0, 0, 0.3)');
+                r.style.setProperty('--toggleDM-gradient-color', 'linear-gradient(180deg,#ffcc89,#d8860b)');
+                r.style.setProperty('--toggleDM-position-left', '4px');
+                r.style.setProperty('--toggleDM-transform', '');
             }
         }
-
+        
         
     </script>
     <style>
@@ -104,7 +111,10 @@
         /* Flat thumb: */
         --slider-thumb-shadow: -2px -2px 8px rgba(255, 255, 255, 0.5), 2px 2px 4px rgba(0, 0, 0, 0.4), inset 2px 2px 0px rgba(255, 255, 255, 0), inset -2px -2px 0px rgba(0, 0, 0, 0);
         --background-color: #F0F0F0;
-        --transition-duration: 250ms;
+        --toggleDM-gradient-color: linear-gradient(180deg,#ffcc89,#d8860b);
+        --toggleDM-position-left: 4px;
+        --toggleDM-transform: ;
+        --transition-duration: 0ms;
         --margin: 15px;
     }
     body{
@@ -425,14 +435,15 @@
         }
         
         .labelToggle::after {
-        background: linear-gradient(180deg,#ffcc89,#d8860b);
+        background: var(--toggleDM-gradient-color);
         border-radius: 42px;
         content: ' ';
         cursor: pointer;
         display: block;
         position: absolute;
         top:4px;
-		left:4px;
+		left:var(--toggleDM-position-left);
+        transform: var(--toggleDM-transform);
         transition: var(--transition-duration);
 		width:42px;
 		height: 42px;
@@ -442,9 +453,9 @@
             background: transparent;
         }
         .inputToggle:checked + label::after {
-        left: 96px;
-        transform: translateX(-100%);
-        background: linear-gradient(180deg,#777,#3a3a3a);
+        left: var(--toggleDM-position-left);
+        transform: var(--toggleDM-transform);
+        background: var(--toggleDM-gradient-color);
         }
         .labelToggle:active:after{
             width: 60px;
