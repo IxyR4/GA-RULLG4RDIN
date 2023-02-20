@@ -57,7 +57,7 @@ const uint8_t wifi_scan_delay_seconds = 5; // How long to wait between scans
 
 bool darkMode = false;
 
-const bool debug = true;
+#define DEBUG 1
 
 AsyncWebServer  server(80);
 
@@ -281,8 +281,12 @@ void handle_down() {
 
 void handle_slider(String url) {
   uint16_t slider_position = url.substring(-1, 8).toInt(); // Remove '/slider/' from url
-  rullgardin.set_speed(slider_position);
-  multiLog.println("Setting speed: " + slider_position);
+  
+  if (rullgardin.set_speed(slider_position)) {
+    multiLog.println("Setting speed: " + String(slider_position));
+  } else {
+    multiLog.println("Failed setting speed: " + String(slider_position));
+  }
 }
 
 void darkmode_on() {darkMode = true;}
@@ -325,7 +329,7 @@ String SendHTML(){
 }
 
 void flash_led(uint8_t flashes, uint16_t on_time, uint16_t off_time) {
-  #if debug
+  #if DEBUG
     multiLog.println("Flashing LED");
   #endif
 
