@@ -1,3 +1,6 @@
+#ifndef multiLog_h
+#define multiLog_h
+
 #include <stdlib.h>
 #include <Arduino.h>
 #include <WebSerial.h>
@@ -51,3 +54,5 @@ public:
 private:
     bool WebSerialEnabled = false;
 };
+
+#endif

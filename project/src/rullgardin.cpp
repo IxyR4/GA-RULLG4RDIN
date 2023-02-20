@@ -5,7 +5,6 @@
 // #define CCW -1
 
 #include "rullgardin.h"
-#include "multiLog.h"
 
 extern MultiLogger multiLog;
 extern bool debug;
@@ -61,37 +60,38 @@ void Rullgardin::stop() {
 }
 
 void Rullgardin::open() {
-    if (running && current_direction != up_direction) {
-        stop();
-        delay(10);
-    }
+    // if (running && current_direction != up_direction) {
+    //     stop();
+    // }
     motor.enableOutputs();
+    delay(10);
     current_direction = up_direction;
     running = true;
     #if debug
         multiLog.println("Starting motor in open()");
     #endif
-    move_to_position(0);
+    // move_to_position(0);
 }
 
 void Rullgardin::close() {
-    if (running && current_direction == up_direction) {
-        stop();
-        delay(10);
-    }
+    // if (running && current_direction == up_direction) {
+    //     stop();
+    // }
     motor.enableOutputs();
-    current_direction = up_direction * -1;
+    delay(10);
+    current_direction = down_direction;
     running = true;
     #if debug
         multiLog.println("Starting motor in close()");
     #endif
-    move_to_position(100);
+    // move_to_position(100);
 }
 
 // Not currently implemented
 void Rullgardin::move_to_position(uint8_t position) {
     return;
     motor.enableOutputs();
+    delay(10);
     motor.moveTo(position * max_steps / 100);
     #if debug
         multiLog.println("Starting motor in move_to_position()");
