@@ -50,7 +50,6 @@ private:
     AccelStepper motor;
     bool running = false;
 
-    uint16_t speed = 800;
     uint16_t hard_max_speed = 9001;
 
     int8_t up_direction = CW;

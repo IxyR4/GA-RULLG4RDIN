@@ -15,7 +15,7 @@ Rullgardin::Rullgardin() {
     motor = AccelStepper(MOTOR_INTERFACE_TYPE, STEP_PIN, DIR_PIN);
 
     // Set the maximum motor speed in steps per second
-    motor.setMaxSpeed(2000);
+    motor.setMaxSpeed(1600);
     motor.setEnablePin(ENABLE_PIN);
     motor.setAcceleration(6400);
     motor.disableOutputs();
@@ -129,28 +129,12 @@ bool Rullgardin::set_speed(uint16_t new_speed) {
         multiLog.println("speed: " + String(speed) + ", new_speed: " + String(new_speed));
     #endif
 
-    if (speed != new_speed && 0 < new_speed && new_speed <= hard_max_speed) {
-        speed = new_speed;
+    if (motor.maxSpeed() != new_speed && 0 < new_speed && new_speed <= hard_max_speed) {
         motor.setMaxSpeed(new_speed);
         return true;
     } 
     else 
         return false;
 }
-
-
-// private:
-//     AccelStepper motor;
-//     bool running = false;
-
-//     uint16_t speed = 800;
-//     uint16_t target_speed = 800;
-
-//     int8_t up_direction = CW;
-//     int8_t down_direction = CCW;
-//     int8_t current_direction = CW;
-
-//     uint32_t max_steps = 200*4*10;
-//     uint32_t theoretical_max_steps = 200*4*100;
 
 #endif
