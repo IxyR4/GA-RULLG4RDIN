@@ -13,7 +13,7 @@ extern MultiLogger multiLog;
 // Rullgardin(uint8_t motorInterfaceType, uint8_t stepPin, int8_t dirPin, uint8_t enablePin, uint8_t resetPin) {
 Rullgardin::Rullgardin() {
     // Create a new instance of the AccelStepper class
-    AccelStepper motor = AccelStepper(MOTOR_INTERFACE_TYPE, STEP_PIN, DIR_PIN);
+    motor = AccelStepper(MOTOR_INTERFACE_TYPE, STEP_PIN, DIR_PIN);
 
     // Set the maximum motor speed in steps per second
     motor.setMaxSpeed(2000);
@@ -38,14 +38,14 @@ bool Rullgardin::set_up_direction(int8_t direction) {
 void Rullgardin::run() {
 
     if (running) {
-        #if DEBUG
-            static int loops_since_running_logged = 0;
-            if (loops_since_running_logged >= 500) {
-                multiLog.println("Running: " + String(running) + ", speed: " + String(speed) + ", direction: " + String(current_direction) + ", position: " + String(motor.currentPosition()));
-            } else {
-                loops_since_running_logged++;
-            }
-        #endif
+        // #if DEBUG
+        //     static int loops_since_running_logged = 0;
+        //     if (loops_since_running_logged >= 500) {
+        //         multiLog.println("Running: " + String(running) + ", speed: " + String(speed) + ", direction: " + String(current_direction) + ", position: " + String(motor.currentPosition()));
+        //     } else {
+        //         loops_since_running_logged++;
+        //     }
+        // #endif
         motor.setSpeed(speed * current_direction);
         // motor.run();
         motor.runSpeed();
@@ -112,9 +112,13 @@ void Rullgardin::remove_max_position_limit() {
     max_steps = theoretical_max_steps;
 }
 
-bool Rullgardin::set_speed(uint16_t set_speed) {
-    if (speed != set_speed && 0 < speed < motor.maxSpeed()) {
-        speed = set_speed;
+bool Rullgardin::set_speed(uint16_t new_speed) {
+    #if DEBUG
+        multiLog.println("speed: " + String(speed) + ", new_speed: " + String(new_speed));
+    #endif
+
+    if (speed != new_speed && 0 < new_speed && new_speed <= motor.maxSpeed()) {
+        speed = new_speed;
         return true;
     } 
     else 

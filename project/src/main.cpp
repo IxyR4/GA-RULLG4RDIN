@@ -329,10 +329,6 @@ String SendHTML(){
 }
 
 void flash_led(uint8_t flashes, uint16_t on_time, uint16_t off_time) {
-  #if DEBUG
-    multiLog.println("Flashing LED");
-  #endif
-
   for (uint8_t i = 0; i < flashes; i++) {
       digitalWrite(ONBOARD_LED, HIGH);
       delay(on_time);
