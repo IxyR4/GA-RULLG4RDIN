@@ -7,8 +7,7 @@
 #include "rullgardin.h"
 
 extern MultiLogger multiLog;
-// extern const bool debug;
-#define DEBUG 1
+#define DEBUG 0
 
 // Rullgardin(uint8_t motorInterfaceType, uint8_t stepPin, int8_t dirPin, uint8_t enablePin, uint8_t resetPin) {
 Rullgardin::Rullgardin() {
@@ -35,7 +34,7 @@ bool Rullgardin::set_up_direction(int8_t direction) {
     return false;
 }
 
-void Rullgardin::run() {
+bool Rullgardin::run() {
 
     if (running) {
         // #if DEBUG
@@ -47,9 +46,10 @@ void Rullgardin::run() {
         //     }
         // #endif
         motor.setSpeed(speed * current_direction);
-        // motor.run();
         motor.runSpeed();
+        return true;
     }
+    return false;
 }
 
 void Rullgardin::stop() {
@@ -61,38 +61,35 @@ void Rullgardin::stop() {
 }
 
 void Rullgardin::open() {
-    // if (running && current_direction != up_direction) {
-    //     stop();
-    // }
+    if (running && current_direction != up_direction) {
+        stop();
+    }
     motor.enableOutputs();
-    delay(10);
     current_direction = up_direction;
     running = true;
     #if DEBUG
         multiLog.println("Starting motor in open()");
     #endif
-    // move_to_position(0);
+    move_to_position(0);
 }
 
 void Rullgardin::close() {
-    // if (running && current_direction == up_direction) {
-    //     stop();
-    // }
+    if (running && current_direction == up_direction) {
+        stop();
+    }
     motor.enableOutputs();
-    delay(10);
     current_direction = down_direction;
     running = true;
     #if DEBUG
         multiLog.println("Starting motor in close()");
     #endif
-    // move_to_position(100);
+    move_to_position(100);
 }
 
 // Not currently implemented
 void Rullgardin::move_to_position(uint8_t position) {
     return;
     motor.enableOutputs();
-    delay(10);
     motor.moveTo(position * max_steps / 100);
     #if DEBUG
         multiLog.println("Starting motor in move_to_position()");

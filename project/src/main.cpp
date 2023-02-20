@@ -57,7 +57,7 @@ const uint8_t wifi_scan_delay_seconds = 5; // How long to wait between scans
 
 bool darkMode = false;
 
-#define DEBUG 1
+#define DEBUG 0
 
 AsyncWebServer  server(80);
 

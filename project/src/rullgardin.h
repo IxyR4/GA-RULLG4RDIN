@@ -25,7 +25,7 @@ public:
 
     bool set_up_direction(int8_t direction = CW);
 
-    void run();
+    bool run();
 
     void stop();
 
