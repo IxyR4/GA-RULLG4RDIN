@@ -185,12 +185,7 @@ bool setup_wifi_success() {
     handle_position(request->url().c_str());
     request->send(200);
   });
-
-
-
-
   
-
   AsyncElegantOTA.begin(&server, OTA_USERNAME, OTA_PASSWORD);    // Start ElegantOTA
   
   WebSerial.begin(&server);
