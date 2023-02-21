@@ -620,7 +620,7 @@
             onmouseup="$.post('/position/' + this.value)" 
             ontouchend="$.post('/position/' + this.value)" > <!-- onmouseup for desktop, ontouchend for mobile -->
         <output class="value-box" id="valuePlace">50</output>
-        <input type="range" id="sliderSpeed" value="1000" min="0" max="9001" step="1"
+        <input type="range" id="sliderSpeed" value="800" min="0" max="2000" step="50"
             oninput="this.nextElementSibling.value = this.value" 
             onmouseup="$.post('/speed/' + this.value)" 
             ontouchend="$.post('/speed/' + this.value)" > <!-- onmouseup for desktop, ontouchend for mobile -->
