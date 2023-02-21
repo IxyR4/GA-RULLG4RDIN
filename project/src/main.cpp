@@ -72,7 +72,7 @@ void handle_OnConnect();
 void handle_auto();
 void handle_up();
 void handle_down();
-void handle_slider(String url);
+void handle_speed(String url);
 void handle_NotFound();
 void recvMsg(uint8_t *data, size_t len);
 
@@ -169,29 +169,27 @@ bool setup_wifi_success() {
     handle_auto();
     request->send(200);
   });
-  server.on("/ledon", [](AsyncWebServerRequest *request){
+  server.on("/up", [](AsyncWebServerRequest *request){
     handle_up();
     request->send(200);
   });
-  server.on("/ledoff", [](AsyncWebServerRequest *request){
+  server.on("/down", [](AsyncWebServerRequest *request){
     handle_down();
     request->send(200);
   });
-  server.on("/slider", [](AsyncWebServerRequest *request){
-    handle_slider(request->url().c_str());
+  server.on("/speed", [](AsyncWebServerRequest *request){
+    handle_speed(request->url().c_str());
     request->send(200);
   });
-  server.on("/darkmode_on", [](AsyncWebServerRequest *request){
-    darkmode_on();
+  server.on("/position", [](AsyncWebServerRequest *request){
+    handle_position(request->url().c_str());
     request->send(200);
   });
-  server.on("/darkmode_off", [](AsyncWebServerRequest *request){
-    darkmode_off();
-    request->send(200);
-  });
-  server.on("/get_dark_mode", HTTP_GET, [](AsyncWebServerRequest *request){
-    request->send(200, "text/html", (get_dark_mode() ? "true" : "false"));
-  });
+
+
+
+
+  
 
   AsyncElegantOTA.begin(&server, OTA_USERNAME, OTA_PASSWORD);    // Start ElegantOTA
   
@@ -278,7 +276,7 @@ void handle_down() {
   multiLog.println("Moving down");
 }
 
-void handle_slider(String url) {
+void handle_speed(String url) {
   uint16_t slider_position = url.substring(-1, 8).toInt(); // Remove '/slider/' from url
   
   if (rullgardin.set_speed(slider_position)) {
