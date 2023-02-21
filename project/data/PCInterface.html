@@ -29,7 +29,7 @@
         function onMessage(event) {
             var new_value = event.data.replace("position=", "");
             document.getElementById("valuePlace").value = new_value;
-            document.getElementById("sliderPlace").setAttribute("value", new_value);
+            document.getElementById("sliderPlace").value = new_value;
         }
         function onLoad(event) {
             initWebSocket();
