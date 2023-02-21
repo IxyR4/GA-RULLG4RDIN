@@ -74,6 +74,7 @@ void handle_up();
 void handle_down();
 void handle_speed(String url);
 void handle_NotFound();
+void handle_position(String url);
 void recvMsg(uint8_t *data, size_t len);
 
 String SendHTML();
@@ -185,7 +186,7 @@ bool setup_wifi_success() {
     handle_position(request->url().c_str());
     request->send(200);
   });
-  
+
   AsyncElegantOTA.begin(&server, OTA_USERNAME, OTA_PASSWORD);    // Start ElegantOTA
   
   WebSerial.begin(&server);
@@ -279,6 +280,10 @@ void handle_speed(String url) {
   } else {
     multiLog.println("Failed setting speed: " + String(slider_position));
   }
+}
+
+void handle_position(String url) {
+  return;
 }
 
 void darkmode_on() {darkMode = true;}
