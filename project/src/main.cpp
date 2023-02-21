@@ -40,6 +40,8 @@
 
 #include "rullgardin.h"
 
+#include <map>
+
 #define ONBOARD_LED  2
 
 // Remote server, where to upload internal IP
@@ -70,7 +72,7 @@ bool setup_wifi_success();
 bool connect_wifi_network(String ssid, String password, String id);
 void send_ip_to_remote_server();
 
-void notifyClients(int _position);
+void notifyClients(std::map<String, String> config);
 void handleWebSocketMessage(void *arg, uint8_t *data, size_t len);
 void onEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType type,
              void *arg, uint8_t *data, size_t len);
@@ -125,7 +127,8 @@ void loop() {
 
   current_position = rullgardin.get_position();
   if (current_position != position_when_last_checked && millis() - last_position_update > 500) {
-    notifyClients(current_position);
+    std::map<String, String> config_map = {{"position", String(current_position)}};
+    notifyClients(config_map);
     // multiLog.println("Position: " + String(current_position) + ", last position: " + String(position_when_last_checked));     
     position_when_last_checked = current_position;
     last_position_update = millis();
@@ -237,8 +240,16 @@ bool setup_wifi_success() {
   return true;
 }
 
-void notifyClients(int _position) {
-  ws.textAll("position=" + String(_position));
+void notifyClients(std::map<String, String> config) {
+  String message = "{";
+  // Extract all key-value pairs
+  for (const auto& pair : config) {
+      message.concat(pair.first.c_str());
+      message.concat(pair.second.c_str());
+  }
+  message.remove(message.length() - 2);
+  message = message + "}";
+  ws.textAll(message);
   // multiLog.println("Notified clients of new position: " + String(rullgardin.get_position()));
 }
 
@@ -350,17 +361,22 @@ void handle_down() {
 }
 
 void handle_speed(String url) {
-  uint16_t slider_position = url.substring(-1, 7).toInt(); // Remove '/slider/' from url
+  uint16_t slider_position = url.substring(-1, 7).toInt(); // Remove '/speed/' from url
   
   if (rullgardin.set_speed(slider_position)) {
+  #if DEBUG
     multiLog.println("Setting speed: " + String(slider_position));
   } else {
     multiLog.println("Failed setting speed: " + String(slider_position));
+  #else
+    return;
+  #endif
   }
 }
 
 void handle_position(String url) {
-  return;
+  uint16_t slider_position = url.substring(-1, 10).toInt(); // Remove '/position/' from url
+  rullgardin.move_to_position(slider_position);
 }
 
 void darkmode_on() {darkMode = true;}
