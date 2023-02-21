@@ -70,7 +70,7 @@ bool setup_wifi_success();
 bool connect_wifi_network(String ssid, String password, String id);
 void send_ip_to_remote_server();
 
-void notifyClients();
+void notifyClients(int _position);
 void handleWebSocketMessage(void *arg, uint8_t *data, size_t len);
 void onEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType type,
              void *arg, uint8_t *data, size_t len);
@@ -108,10 +108,12 @@ void setup() {
 
 void loop() {
   static long last_websocket_cleanup = millis();
-  static long last_position_log = millis();
+  // static long last_position_log = millis();
+  static long last_position_update = millis();
   static int position_when_last_checked;
+  static int current_position;
 
-  rullgardin.run();
+  // rullgardin.run();
 
   if (millis() - last_websocket_cleanup > 5*1000) {
     // multiLog.println("Cleaned up WebSocket clients.");
@@ -119,14 +121,15 @@ void loop() {
     last_websocket_cleanup = millis();
   }  
 
-  rullgardin.run();
+  // rullgardin.run();
 
-  if (rullgardin.get_position() != position_when_last_checked) {
-    notifyClients();
-    multiLog.println("Position: " + String(rullgardin.get_position()) + ", last position: " + String(position_when_last_checked));     
-    position_when_last_checked = rullgardin.get_position();
+  current_position = rullgardin.get_position();
+  if (current_position != position_when_last_checked && millis() - last_position_update > 500) {
+    notifyClients(current_position);
+    // multiLog.println("Position: " + String(current_position) + ", last position: " + String(position_when_last_checked));     
+    position_when_last_checked = current_position;
+    last_position_update = millis();
   }
-
   if (rullgardin.run()) {
     digitalWrite(ONBOARD_LED, HIGH);
   } else {
@@ -234,9 +237,9 @@ bool setup_wifi_success() {
   return true;
 }
 
-void notifyClients() {
-  ws.textAll("position=" + String(rullgardin.get_position()));
-  multiLog.println("Notified clients of new position: " + String(rullgardin.get_position()));
+void notifyClients(int _position) {
+  ws.textAll("position=" + String(_position));
+  // multiLog.println("Notified clients of new position: " + String(rullgardin.get_position()));
 }
 
 void handleWebSocketMessage(void *arg, uint8_t *data, size_t len) {
@@ -244,7 +247,8 @@ void handleWebSocketMessage(void *arg, uint8_t *data, size_t len) {
   if (info->final && info->index == 0 && info->len == len && info->opcode == WS_TEXT) {
     data[len] = 0;
     if (strcmp((char*)data, "toggle") == 0) {
-      notifyClients();
+      // notifyClients();
+      return;
     }
   }
 }

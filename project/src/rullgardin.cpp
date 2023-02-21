@@ -97,7 +97,7 @@ void Rullgardin::close() {
 }
 
 int Rullgardin::get_position() {
-    return int(motor.currentPosition() / max_steps * 100);
+    return motor.currentPosition() * 100 / max_steps;
 }
 
 void Rullgardin::move_to_position(uint8_t in_position) {
