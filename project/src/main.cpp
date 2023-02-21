@@ -114,7 +114,7 @@ void loop() {
   rullgardin.run();
 
   if (millis() - last_websocket_cleanup > 5*1000) {
-    multiLog.println("Cleaned up WebSocket clients.");
+    // multiLog.println("Cleaned up WebSocket clients.");
     ws.cleanupClients();
     last_websocket_cleanup = millis();
   }  
@@ -123,6 +123,7 @@ void loop() {
 
   if (rullgardin.get_position() != position_when_last_checked) {
     notifyClients();
+    multiLog.println("Position: " + String(rullgardin.get_position()) + ", last position: " + String(position_when_last_checked));     
     position_when_last_checked = rullgardin.get_position();
   }
 
@@ -132,10 +133,10 @@ void loop() {
     digitalWrite(ONBOARD_LED, LOW);
   }
   
-    if (millis() - last_position_log > 1000) {
-      multiLog.println("Position: " + String(rullgardin.get_position()) + ", last position: " + String(position_when_last_checked)); 
-      last_position_log = millis();
-    }
+    // if (millis() - last_position_log > 1000) {
+    //   multiLog.println("Position: " + String(rullgardin.get_position()) + ", last position: " + String(position_when_last_checked)); 
+    //   last_position_log = millis();
+    // }
 }
 
 bool setup_wifi_success() {
