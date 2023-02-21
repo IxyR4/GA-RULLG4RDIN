@@ -9,6 +9,40 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js">/* Import Ajax, which allow for using $.post to send data to the ESP */</script> 
     <script>
+        var gateway = `ws://${window.location.hostname}/ws`;
+        var websocket;
+        window.addEventListener('load', onLoad);
+        function initWebSocket() {
+            console.log('Trying to open a WebSocket connection...');
+            websocket = new WebSocket(gateway);
+            websocket.onopen    = onOpen;
+            websocket.onclose   = onClose;
+            websocket.onmessage = onMessage; // <-- add this line
+        }
+        function onOpen(event) {
+            console.log('Connection opened');
+        }
+        function onClose(event) {
+            console.log('Connection closed');
+            setTimeout(initWebSocket, 2000);
+        }
+        function onMessage(event) {
+            var new_value = event.data.replace("position=", "");
+            document.getElementById("valuePlace").value = new_value;
+            document.getElementById("sliderPlace").setAttribute("value", new_value);
+        }
+        function onLoad(event) {
+            initWebSocket();
+            initButton();
+        }
+        // function initButton() {
+        //     document.getElementById('button').addEventListener('click', toggle);
+        // }
+        // function toggle(){
+        //     websocket.send('toggle');
+        // }
+
+
         var darkmodeTest = false;
         var r = document.querySelector(':root');
 

@@ -55,11 +55,13 @@ const uint8_t wifi_connect_seconds_timeout_per_network = 10; // Seconds
 const uint8_t wifi_scan_tries = 2; // How many scans it should do before giving up
 const uint8_t wifi_scan_delay_seconds = 5; // How long to wait between scans
 
+
 bool darkMode = false;
 
 #define DEBUG 0
 
 AsyncWebServer  server(80);
+AsyncWebSocket ws("/ws");
 
 MultiLogger multiLog;
 
@@ -67,6 +69,12 @@ MultiLogger multiLog;
 bool setup_wifi_success();
 bool connect_wifi_network(String ssid, String password, String id);
 void send_ip_to_remote_server();
+
+void notifyClients();
+void handleWebSocketMessage(void *arg, uint8_t *data, size_t len);
+void onEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType type,
+             void *arg, uint8_t *data, size_t len);
+void initWebSocket();
 
 void handle_OnConnect();
 void handle_auto();
@@ -98,11 +106,35 @@ void setup() {
 }
 
 void loop() {
+  static long last_websocket_cleanup = millis();
+  static long last_position_log = millis();
+  static int position_when_last_checked;
+
+  rullgardin.run();
+
+  if (millis() - last_websocket_cleanup > 5*1000) {
+    multiLog.println("Cleaned up WebSocket clients.");
+    ws.cleanupClients();
+    last_websocket_cleanup = millis();
+  }  
+
+  rullgardin.run();
+
+  if (rullgardin.get_position() != position_when_last_checked) {
+    notifyClients();
+    position_when_last_checked = rullgardin.get_position();
+  }
+
   if (rullgardin.run()) {
     digitalWrite(ONBOARD_LED, HIGH);
   } else {
     digitalWrite(ONBOARD_LED, LOW);
   }
+  
+    if (millis() - last_position_log > 1000) {
+      multiLog.println("Position: " + String(rullgardin.get_position()) + ", last position: " + String(position_when_last_checked)); 
+      last_position_log = millis();
+    }
 }
 
 bool setup_wifi_success() {
@@ -193,6 +225,8 @@ bool setup_wifi_success() {
     request->send(200, "text/html", (get_dark_mode() ? "true" : "false"));
   });
 
+  initWebSocket();
+
   AsyncElegantOTA.begin(&server, OTA_USERNAME, OTA_PASSWORD);    // Start ElegantOTA
   
   WebSerial.begin(&server);
@@ -203,6 +237,44 @@ bool setup_wifi_success() {
   multiLog.println(": HTTP server started. ");
 
   return true;
+}
+
+void notifyClients() {
+  ws.textAll("position=" + String(rullgardin.get_position()));
+  multiLog.println("Notified clients of new position: " + String(rullgardin.get_position()));
+}
+
+void handleWebSocketMessage(void *arg, uint8_t *data, size_t len) {
+  AwsFrameInfo *info = (AwsFrameInfo*)arg;
+  if (info->final && info->index == 0 && info->len == len && info->opcode == WS_TEXT) {
+    data[len] = 0;
+    if (strcmp((char*)data, "toggle") == 0) {
+      notifyClients();
+    }
+  }
+}
+
+void onEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType type,
+             void *arg, uint8_t *data, size_t len) {
+  switch (type) {
+    case WS_EVT_CONNECT:
+      Serial.printf("WebSocket client #%u connected from %s\n", client->id(), client->remoteIP().toString().c_str());
+      break;
+    case WS_EVT_DISCONNECT:
+      Serial.printf("WebSocket client #%u disconnected\n", client->id());
+      break;
+    case WS_EVT_DATA:
+      handleWebSocketMessage(arg, data, len);
+      break;
+    case WS_EVT_PONG:
+    case WS_EVT_ERROR:
+      break;
+  }
+}
+
+void initWebSocket() {
+  ws.onEvent(onEvent);
+  server.addHandler(&ws);
 }
 
 void recvMsg(uint8_t *data, size_t len){
@@ -279,7 +351,7 @@ void handle_down() {
 }
 
 void handle_slider(String url) {
-  uint16_t slider_position = url.substring(-1, 8).toInt(); // Remove '/slider/' from url
+  uint16_t slider_position = url.substring(-1, 7).toInt(); // Remove '/slider/' from url
   
   if (rullgardin.set_speed(slider_position)) {
     multiLog.println("Setting speed: " + String(slider_position));
