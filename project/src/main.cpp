@@ -16,6 +16,8 @@
 #include <stdlib.h>
 #include <Arduino.h>
 
+#include <ArduinoJson.h>
+
 #include "multiLog.h"
 /* Network credentials are stored in network_credentials.h, enter them there */
 //-- Network related --//
@@ -71,7 +73,7 @@ bool setup_wifi_success();
 bool connect_wifi_network(String ssid, String password, String id);
 void send_ip_to_remote_server();
 
-void notifyClients(std::map<String, String> config);
+void notifyClients(DynamicJsonDocument config);
 void handleWebSocketMessage(void *arg, uint8_t *data, size_t len);
 void onEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType type,
              void *arg, uint8_t *data, size_t len);
@@ -128,7 +130,9 @@ void loop() {
   current_position = rullgardin.get_position();
   if (current_position != position_when_last_checked) {
     std::map<String, String> config_map = {{"position", String(current_position)}};
-    notifyClients(config_map);
+    StaticJsonDocument<128> config;
+    config["position"] = current_position;
+    notifyClients(config);
     // multiLog.println("Position: " + String(current_position) + ", last position: " + String(position_when_last_checked));     
     position_when_last_checked = current_position;
     last_position_update = millis();
@@ -235,17 +239,11 @@ bool setup_wifi_success() {
   return true;
 }
 
-void notifyClients(std::map<String, String> config) {
-  String message = "{";
-  // Extract all key-value pairs
-  for (const auto& pair : config) {
-      message.concat(pair.first.c_str());
-      message.concat(pair.second.c_str());
-  }
-  message.remove(message.length() - 2);
-  message = message + "}";
+void notifyClients(DynamicJsonDocument config) {
+  String message;
+  serializeJson(config, message);
   ws.textAll(message);
-  // multiLog.println("Notified clients of new position: " + String(rullgardin.get_position()));
+  multiLog.println("Send WebSocket message: " + message);
 }
 
 void handleWebSocketMessage(void *arg, uint8_t *data, size_t len) {
