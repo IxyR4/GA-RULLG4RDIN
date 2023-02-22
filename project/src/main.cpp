@@ -109,8 +109,13 @@ void loop() {
   static long last_position_update = millis();
   static int position_when_last_checked;
   static int current_position;
-
-  // rullgardin.run();
+  
+  if (rullgardin.run()) {
+    digitalWrite(ONBOARD_LED, HIGH);
+    return;
+  } // else
+  
+  digitalWrite(ONBOARD_LED, LOW);
 
   if (millis() - last_websocket_cleanup > 5*1000) {
     // multiLog.println("Cleaned up WebSocket clients.");
@@ -121,17 +126,12 @@ void loop() {
   // rullgardin.run();
 
   current_position = rullgardin.get_position();
-  if (current_position != position_when_last_checked && millis() - last_position_update > 500) {
+  if (current_position != position_when_last_checked) {
     std::map<String, String> config_map = {{"position", String(current_position)}};
     notifyClients(config_map);
     // multiLog.println("Position: " + String(current_position) + ", last position: " + String(position_when_last_checked));     
     position_when_last_checked = current_position;
     last_position_update = millis();
-  }
-  if (rullgardin.run()) {
-    digitalWrite(ONBOARD_LED, HIGH);
-  } else {
-    digitalWrite(ONBOARD_LED, LOW);
   }
   
     // if (millis() - last_position_log > 1000) {
