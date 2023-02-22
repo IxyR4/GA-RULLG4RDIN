@@ -257,7 +257,7 @@ void sendFullConfigWebSocket(int32_t client_id) {
   StaticJsonDocument<128> config;
   config["speed"] = rullgardin.get_speed();
   config["position"] = rullgardin.get_position();
-  config["max_steps"] = rullgardin.get_max_steps();
+  config["maxSteps"] = rullgardin.get_max_steps();
   sendWebSocket(config, client_id);
 }
 void handleWebSocketMessage(void *arg, uint8_t *data, size_t len) {
@@ -360,7 +360,7 @@ void handle_auto() {
 
 void handle_up() {
   StaticJsonDocument<128> config;
-  config["moving_to"] = 0;
+  config["movingTo"] = 0;
   sendWebSocket(config);
   rullgardin.open();
   multiLog.println("Moving up");
@@ -368,7 +368,7 @@ void handle_up() {
 
 void handle_down() {
   StaticJsonDocument<128> config;
-  config["moving_to"] = 100;
+  config["movingTo"] = 100;
   sendWebSocket(config);
   rullgardin.close();
   multiLog.println("Moving down");
@@ -392,7 +392,7 @@ void handle_position(String url) {
   uint16_t slider_position = url.substring(-1, 10).toInt(); // Remove '/position/' from url
   
   StaticJsonDocument<128> config;
-  config["moving_to"] = slider_position;
+  config["movingTo"] = slider_position;
   sendWebSocket(config);
 
   rullgardin.move_to_position(slider_position);
