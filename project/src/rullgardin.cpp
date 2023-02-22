@@ -112,6 +112,7 @@ void Rullgardin::move_to_position(uint8_t in_position) {
 }
 
 void Rullgardin::set_current_position_as_top() {
+    max_steps -= motor.currentPosition();
     motor.setCurrentPosition(0);
 }
 
@@ -121,6 +122,10 @@ void Rullgardin::set_current_position_as_max() {
 
 void Rullgardin::remove_max_position_limit() {
     max_steps = theoretical_max_steps;
+}
+
+uint16_t Rullgardin::get_speed() {
+    return abs(motor.maxSpeed());
 }
 
 bool Rullgardin::set_speed(uint16_t new_speed) {
@@ -136,4 +141,7 @@ bool Rullgardin::set_speed(uint16_t new_speed) {
         return false;
 }
 
+uint16_t Rullgardin::get_max_steps() {
+    return max_steps;
+}
 #endif

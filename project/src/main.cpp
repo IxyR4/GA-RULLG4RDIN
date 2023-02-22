@@ -73,7 +73,8 @@ bool setup_wifi_success();
 bool connect_wifi_network(String ssid, String password, String id);
 void send_ip_to_remote_server();
 
-void notifyClients(DynamicJsonDocument config);
+void sendWebSocket(DynamicJsonDocument config, int32_t client_id = -1);
+void sendFullConfigWebSocket(int32_t client_id = -1);
 void handleWebSocketMessage(void *arg, uint8_t *data, size_t len);
 void onEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType type,
              void *arg, uint8_t *data, size_t len);
@@ -103,6 +104,8 @@ void setup() {
 
   if (!setup_wifi_success())
     multiLog.println("Network connection failed, continuing in offline mode (which is the exact same thing as online mode).");
+
+  sendFullConfigWebSocket();
 }
 
 void loop() {
@@ -129,11 +132,9 @@ void loop() {
 
   current_position = rullgardin.get_position();
   if (current_position != position_when_last_checked) {
-    std::map<String, String> config_map = {{"position", String(current_position)}};
     StaticJsonDocument<128> config;
     config["position"] = current_position;
-    notifyClients(config);
-    // multiLog.println("Position: " + String(current_position) + ", last position: " + String(position_when_last_checked));     
+    sendWebSocket(config);    
     position_when_last_checked = current_position;
     last_position_update = millis();
   }
@@ -239,19 +240,32 @@ bool setup_wifi_success() {
   return true;
 }
 
-void notifyClients(DynamicJsonDocument config) {
+void sendWebSocket(DynamicJsonDocument config, int32_t client_id) {
   String message;
   serializeJson(config, message);
-  ws.textAll(message);
-  multiLog.println("Send WebSocket message: " + message);
+  
+  if (client_id == -1) {
+    ws.textAll(message);
+    multiLog.println("Send WebSocket message: " + message);
+  } else {
+    ws.text(client_id, message);
+    multiLog.println("Send WebSocket message to client #" + String(client_id) + ": " + message);
+  }
 }
 
+void sendFullConfigWebSocket(int32_t client_id) {
+  StaticJsonDocument<128> config;
+  config["speed"] = rullgardin.get_speed();
+  config["position"] = rullgardin.get_position();
+  config["max_steps"] = rullgardin.get_max_steps();
+  sendWebSocket(config, client_id);
+}
 void handleWebSocketMessage(void *arg, uint8_t *data, size_t len) {
   AwsFrameInfo *info = (AwsFrameInfo*)arg;
   if (info->final && info->index == 0 && info->len == len && info->opcode == WS_TEXT) {
     data[len] = 0;
     if (strcmp((char*)data, "toggle") == 0) {
-      // notifyClients();
+      // sendWebSocket();
       return;
     }
   }
@@ -262,6 +276,7 @@ void onEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType 
   switch (type) {
     case WS_EVT_CONNECT:
       Serial.printf("WebSocket client #%u connected from %s\n", client->id(), client->remoteIP().toString().c_str());
+      sendFullConfigWebSocket(client->id());
       break;
     case WS_EVT_DISCONNECT:
       Serial.printf("WebSocket client #%u disconnected\n", client->id());
@@ -344,11 +359,17 @@ void handle_auto() {
 }
 
 void handle_up() {
+  StaticJsonDocument<128> config;
+  config["moving_to"] = 0;
+  sendWebSocket(config);
   rullgardin.open();
   multiLog.println("Moving up");
 }
 
 void handle_down() {
+  StaticJsonDocument<128> config;
+  config["moving_to"] = 100;
+  sendWebSocket(config);
   rullgardin.close();
   multiLog.println("Moving down");
 }
@@ -369,6 +390,11 @@ void handle_speed(String url) {
 
 void handle_position(String url) {
   uint16_t slider_position = url.substring(-1, 10).toInt(); // Remove '/position/' from url
+  
+  StaticJsonDocument<128> config;
+  config["moving_to"] = slider_position;
+  sendWebSocket(config);
+
   rullgardin.move_to_position(slider_position);
 }
 

@@ -43,7 +43,11 @@ public:
 
     void remove_max_position_limit();
 
+    uint16_t get_speed();
+
     bool set_speed(uint16_t set_speed);
+
+    uint16_t get_max_steps();
 
 
 private:
