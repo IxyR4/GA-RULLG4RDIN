@@ -48,16 +48,6 @@
                 document.getElementById("valuePlace").value = objEsp.position
             }
         }
-        function onLoad(event) {
-            initWebSocket();
-            initButton();
-        }
-        // function initButton() {
-        //     document.getElementById('button').addEventListener('click', toggle);
-        // }
-        // function toggle(){
-        //     websocket.send('toggle');
-        // }
         
         async function devModeFunc() {
             if(devMode == true) {
@@ -86,6 +76,8 @@
         }
 
         function onLoad() {
+            initWebSocket();
+
             if(getCookie("darkMode") == null) {
                 setCookie("darkMode", "true");
             }
