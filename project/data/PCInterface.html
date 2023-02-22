@@ -12,6 +12,11 @@
         var gateway = `ws://${window.location.hostname}/ws`;
         var websocket;
         var devMode = false;
+        var root = document.querySelector(':root');
+        var speed;
+        var maxStep;
+        var percentPerSec;
+        var moveToPosition;
         window.addEventListener('load', onLoad);
         function initWebSocket() {
             console.log('Trying to open a WebSocket connection...');
@@ -39,21 +44,24 @@
             }
             if ("devMode" in objEsp) {
                 devMode = objEsp.devMode;
-
             }
-            if ("position" in objEsp) {
-                document.getElementById("valuePlace").value = objEsp.position
+            if ("maxSteps" in objEsp) {
+                maxStep = objEsp.maxSteps;
             }
-            if ("position" in objEsp) {
-                document.getElementById("valuePlace").value = objEsp.position
+            if ("movingTo" in objEsp) {
+                moveToPosition = objEsp.movingTo;
+                moveSliderToPosition();
             }
         }
         
-        async function devModeFunc() {
+        async function devModeToggle() {
             if(devMode == true) {
                 root.style.setProperty('--transition-duration', '0ms ease-in-out');
                 document.querySelector('#sliderSpeed').style.setProperty('visibility', '');
                 document.querySelector('#valueSpeed').style.setProperty('visibility', '');
+                document.querySelector('#sliderSpeed').style.setProperty('position', '');
+                document.querySelector('#valueSpeed').style.setProperty('position', '');
+                document.querySelector('.control-ui').style.setProperty('grid-template', "'auto-btn auto-btn''down-btn up-btn''sliderPlace sliderPlace''valuePlace valuePlace''sliderSpeed sliderSpeed''valueSpeed valueSpeed''test-btn test-btn'");
                 await sleep(10);
                 root.style.setProperty('--transition-duration', '250ms ease-in-out');
                 devMode = false;
@@ -62,15 +70,32 @@
                 root.style.setProperty('--transition-duration', '0ms ease-in-out');
                 document.querySelector('#sliderSpeed').style.setProperty('visibility', 'hidden');
                 document.querySelector('#valueSpeed').style.setProperty('visibility', 'hidden');
+                document.querySelector('#sliderSpeed').style.setProperty('position', 'absolute');
+                document.querySelector('#valueSpeed').style.setProperty('position', 'absolute');
+                document.querySelector('.control-ui').style.setProperty('grid-template', "'auto-btn auto-btn''down-btn up-btn''sliderPlace sliderPlace''valuePlace valuePlace''test-btn test-btn'");  
                 await sleep(10);
                 root.style.setProperty('--transition-duration', '250ms ease-in-out');
                 devMode = true;
             }
         }
 
-        var root = document.querySelector(':root');
-        var valuePlaceText = "";
-        var valueSpeedText = "";
+        async function moveSliderToPosition() {
+            percentPerSec = document.getElementById("valueSpeed").value/maxStep*100;
+            var waitTimeSlider = 1000/percentPerSec;
+            while(document.getElementById("sliderPlace").value != moveToPosition) {
+                if(moveToPosition > document.getElementById("sliderPlace").value){
+                    document.getElementById("sliderPlace").value += 1;
+                    await sleep(waitTimeSlider);
+                }
+                else if(moveToPosition < document.getElementById("sliderPlace").value){
+                    document.getElementById("sliderPlace").value -= 1;
+                    await sleep(waitTimeSlider);
+                }
+                document.getElementById("valuePlace").value = document.getElementById("sliderPlace").value;
+            }
+        }
+        
+
         function sleep(ms) {
             return new Promise(resolve => setTimeout(resolve, ms));
         }
@@ -637,7 +662,7 @@
         <button class="button" id="up-btn" onclick="$.post('/up')"> 
             <span>Up</span>
         </button>
-        <button class="button" id="test-btn" onclick="devModeFunc()"> 
+        <button class="button" id="test-btn" onclick="moveSliderToPosition()"> 
             <span>Test</span>
         </button>
         <input type="range" id="sliderPlace"value="50" min="0" max="100" 
