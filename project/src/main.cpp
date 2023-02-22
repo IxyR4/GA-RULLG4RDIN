@@ -58,7 +58,6 @@ const uint8_t wifi_scan_tries = 2; // How many scans it should do before giving 
 const uint8_t wifi_scan_delay_seconds = 5; // How long to wait between scans
 
 
-bool darkMode = false;
 
 #define DEBUG 0
 
@@ -88,10 +87,6 @@ void handle_position(String url);
 void recvMsg(uint8_t *data, size_t len);
 
 String SendHTML();
-
-void darkmode_on();
-void darkmode_off();
-bool get_dark_mode();
 
 Rullgardin rullgardin = Rullgardin();
 
@@ -378,10 +373,6 @@ void handle_position(String url) {
   uint16_t slider_position = url.substring(-1, 10).toInt(); // Remove '/position/' from url
   rullgardin.move_to_position(slider_position);
 }
-
-void darkmode_on() {darkMode = true;}
-void darkmode_off() {darkMode = false;}
-bool get_dark_mode() {return darkMode;}
 
 // Prepares HTML code to send to client, from PCInterface.html
 String SendHTML(){
