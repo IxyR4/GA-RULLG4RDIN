@@ -11,6 +11,7 @@
     <script>
         var gateway = `ws://${window.location.hostname}/ws`;
         var websocket;
+        var devMode = false;
         window.addEventListener('load', onLoad);
         function initWebSocket() {
             console.log('Trying to open a WebSocket connection...');
@@ -27,9 +28,25 @@
             setTimeout(initWebSocket, 2000);
         }
         function onMessage(event) {
-            var new_value = event.data.replace("position=", "");
-            document.getElementById("valuePlace").value = new_value;
-            document.getElementById("sliderPlace").value = new_value;
+            var objEsp = JSON.parse(event.data)
+            if ("position" in objEsp) {
+                document.getElementById("valuePlace").value = objEsp.position;
+                document.getElementById("sliderPlace").value = objEsp.position;
+            }
+            if ("speed" in objEsp) {
+                document.getElementById("valueSpeed").value = objEsp.speed;
+                document.getElementById("sliderSpeed").value = objEsp.speed;
+            }
+            if ("devMode" in objEsp) {
+                devMode = objEsp.devMode;
+
+            }
+            if ("position" in objEsp) {
+                document.getElementById("valuePlace").value = objEsp.position
+            }
+            if ("position" in objEsp) {
+                document.getElementById("valuePlace").value = objEsp.position
+            }
         }
         function onLoad(event) {
             initWebSocket();
@@ -41,6 +58,25 @@
         // function toggle(){
         //     websocket.send('toggle');
         // }
+        
+        async function devModeFunc() {
+            if(devMode == true) {
+                root.style.setProperty('--transition-duration', '0ms ease-in-out');
+                document.querySelector('#sliderSpeed').style.setProperty('visibility', '');
+                document.querySelector('#valueSpeed').style.setProperty('visibility', '');
+                await sleep(10);
+                root.style.setProperty('--transition-duration', '250ms ease-in-out');
+                devMode = false;
+            }
+            else {
+                root.style.setProperty('--transition-duration', '0ms ease-in-out');
+                document.querySelector('#sliderSpeed').style.setProperty('visibility', 'hidden');
+                document.querySelector('#valueSpeed').style.setProperty('visibility', 'hidden');
+                await sleep(10);
+                root.style.setProperty('--transition-duration', '250ms ease-in-out');
+                devMode = true;
+            }
+        }
 
         var root = document.querySelector(':root');
         var valuePlaceText = "";
@@ -49,7 +85,7 @@
             return new Promise(resolve => setTimeout(resolve, ms));
         }
 
-        function checkCookies() {
+        function onLoad() {
             if(getCookie("darkMode") == null) {
                 setCookie("darkMode", "true");
             }
@@ -58,6 +94,9 @@
             }
             updatePageDarkMode();
             sideBarPopOut();
+            if(getCookie("sideBarOut") == "true") {
+                document.getElementById("openSidebarMenu").checked = true;
+            }
             document.getElementById("valuePlace").value = document.getElementById("sliderPlace").value;
             document.getElementById("valueSpeed").value = document.getElementById("sliderSpeed").value;
         }
@@ -352,13 +391,7 @@
             /* Setup Grid */
             display: grid;
             grid-template:
-                'auto-btn auto-btn'
-                'down-btn up-btn'
-                'sliderPlace sliderPlace'
-                'valuePlace valuePlace'
-                'sliderSpeed sliderSpeed'
-                'valueSpeed valueSpeed'
-                'test-btn test-btn';
+                'auto-btn auto-btn''down-btn up-btn''sliderPlace sliderPlace''valuePlace valuePlace''sliderSpeed sliderSpeed''valueSpeed valueSpeed''test-btn test-btn';
             grid-gap: 15px;
             grid-auto-columns: minmax(0, 1fr); /* Make columns equal size */
         }
@@ -489,6 +522,7 @@
         }
         #sliderSpeed {
             grid-area: sliderSpeed;
+
         }
         /*Range Value Label*/
         .value-box {
@@ -565,9 +599,9 @@
 
     </style>
 </head>
-<body onload="checkCookies()">
+<body onload="onLoad()">
     <div class="header"></div>
-    <input type="checkbox" class="openSidebarMenu" id="openSidebarMenu" onclick="sideBarToggle()">
+    <input type="checkbox" id="openSidebarMenu" onclick="sideBarToggle()">
     <label for="openSidebarMenu" class="sidebarIconToggle">
     <div class="spinner diagonal part-1"></div>
     <div class="spinner horizontal"></div>
@@ -611,7 +645,7 @@
         <button class="button" id="up-btn" onclick="$.post('/up')"> 
             <span>Up</span>
         </button>
-        <button class="button" id="test-btn" onclick="$.post('/remove_max_position_limit')"> 
+        <button class="button" id="test-btn" onclick="devModeFunc()"> 
             <span>Test</span>
         </button>
         <input type="range" id="sliderPlace"value="50" min="0" max="100" 
@@ -620,7 +654,7 @@
             onmouseup="$.post('/position/' + this.value)" 
             ontouchend="$.post('/position/' + this.value)" > <!-- onmouseup for desktop, ontouchend for mobile -->
         <output class="value-box" id="valuePlace">50</output>
-        <input type="range" id="sliderSpeed" value="800" min="0" max="2000" step="50"
+        <input type="range" id="sliderSpeed" value="800" min="0" max="2000" step="50" display="false"
             oninput="this.nextElementSibling.value = this.value" 
             onmouseup="$.post('/speed/' + this.value)" 
             ontouchend="$.post('/speed/' + this.value)" > <!-- onmouseup for desktop, ontouchend for mobile -->
