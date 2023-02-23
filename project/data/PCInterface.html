@@ -9,7 +9,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js">/* Import Ajax, which allow for using $.post to send data to the ESP */</script> 
     <script>
-        var gateway = `ws://${window.location.hostname}/ws`;
+        var serverIP = "http://" + "___serverip___"; // ___serverip___ gets replaced with ESP IP, by computer serving the webpage
+        var gateway = "ws://" + "___serverip___" + "/ws";
         var websocket;
         var devMode = false;
         var root = document.querySelector(':root');
@@ -17,7 +18,6 @@
         var maxStep;
         var percentPerSec;
         var moveToPosition;
-        window.addEventListener('load', onLoad);
         function initWebSocket() {
             console.log('Trying to open a WebSocket connection...');
             websocket = new WebSocket(gateway);
@@ -81,7 +81,9 @@
         }
 
         async function moveSliderToPosition() {
-            percentPerSec = document.getElementById("valueSpeed").value/maxStep*100;
+            percentPerSec = document.getElementById("valueSpeed").value/8000*100;
+            console.log("percentPerSec: " + percentPerSec)
+            console.log("document.getElementById(\"valueSpeed\"): " + document.getElementById("valueSpeed").value)
             var waitTimeSlider = 1000/percentPerSec;
             while(document.getElementById("sliderPlace").value != moveToPosition) {
                 if(moveToPosition > document.getElementById("sliderPlace").value){
@@ -632,17 +634,17 @@
 	            <label class="labelToggle" for="darkmode-toggle"></label>
             </li>
             <li>
-                <button class="button" id="set-curr-pos-top-btn" onclick="$.post('/set_current_position_as_top')">
+                <button class="button" id="set-curr-pos-top-btn" onclick="$.post(serverIP + '/set_current_position_as_top')">
                     <span>Set Position as Top</span>
                 </button>
             </li>
             <li>
-                <button class="button" id="set-curr-pos-max-btn" onclick="$.post('/set_current_position_as_max')">
+                <button class="button" id="set-curr-pos-max-btn" onclick="$.post(serverIP + '/set_current_position_as_max')">
                     <span>Set Position as Bottom</span>
                 </button>
             </li>
             <li>
-                <button class="button" id="rmv-max-pos-lim-btn" onclick="$.post('/remove_max_position_limit')">
+                <button class="button" id="rmv-max-pos-lim-btn" onclick="$.post(serverIP + '/remove_max_position_limit')">
                     <span>Remove Bottom Limit</span>
                 </button>
             </li>
@@ -654,13 +656,13 @@
     <div class="background" id="bckGrnd"></div>
     <div class="background" id="coverShadow"></div>
     <div class="control-ui">
-        <button class="button" id="auto-btn" onclick="$.post('/auto')">
+        <button class="button" id="auto-btn" onclick="$.post(serverIP + '/auto')">
             <span>Auto</span>
         </button>
-        <button class="button" id="down-btn" onclick="$.post('/down')"> 
+        <button class="button" id="down-btn" onclick="$.post(serverIP + '/down')"> 
             <span>Down</span>
         </button>
-        <button class="button" id="up-btn" onclick="$.post('/up')"> 
+        <button class="button" id="up-btn" onclick="$.post(serverIP + '/up')"> 
             <span>Up</span>
         </button>
         <button class="button" id="test-btn" onclick="moveSliderToPosition()"> 
@@ -668,14 +670,13 @@
         </button>
         <input type="range" id="sliderPlace"value="50" min="0" max="100" 
             oninput="this.nextElementSibling.value = this.value" 
-            onload="this.nextElementSibling.value = this.value" 
-            onmouseup="$.post('/position/' + this.value)" 
-            ontouchend="$.post('/position/' + this.value)" > <!-- onmouseup for desktop, ontouchend for mobile -->
+            onmouseup="$.post(serverIP + '/position/' + this.value)" 
+            ontouchend="$.post(serverIP + '/position/' + this.value)" > <!-- onmouseup for desktop, ontouchend for mobile -->
         <output class="value-box" id="valuePlace">50</output>
         <input type="range" id="sliderSpeed" value="800" min="0" max="2000" step="50" display="false"
             oninput="this.nextElementSibling.value = this.value" 
-            onmouseup="$.post('/speed/' + this.value)" 
-            ontouchend="$.post('/speed/' + this.value)" > <!-- onmouseup for desktop, ontouchend for mobile -->
+            onmouseup="$.post(serverIP + '/speed/' + this.value)" 
+            ontouchend="$.post(serverIP + '/speed/' + this.value)" > <!-- onmouseup for desktop, ontouchend for mobile -->
         <output class="value-box" id="valueSpeed">1000</output>
         
     </div>
