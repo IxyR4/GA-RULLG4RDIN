@@ -18,6 +18,7 @@
         var maxStep;
         var percentPerSec;
         var moveToPosition;
+        var websocketConnected = false;
         function initWebSocket() {
             console.log('Trying to open a WebSocket connection...');
             websocket = new WebSocket(gateway);
@@ -26,11 +27,34 @@
             websocket.onmessage = onMessage; // <-- add this line
         }
         function onOpen(event) {
+            websocketConnected = true;
             console.log('Connection opened');
         }
         function onClose(event) {
+            websocketConnected = false;
             console.log('Connection closed');
             setTimeout(initWebSocket, 2000);
+            onCloseRestoreConnection();
+        }
+        async function onCloseRestoreConnection(){
+            var i = 0;
+            await sleep(1000);
+            document.querySelector('#disconnectedMessage').style.setProperty('transform', 'translateX(-50%)translateY(-50%)');
+            while(websocketConnected == false) {
+                if(i<20){
+                    websocket = new WebSocket(gateway);
+                    await sleep(1000)
+                    i++;
+                }
+                else
+                {
+                    websocket = new WebSocket(gateway);
+                    await sleep(10000)
+                }
+            }
+            await sleep(3000);
+            document.querySelector('#disconnectedMessage').style.setProperty('transform', 'translateX(-50%)translateY(+180px)');
+
         }
         function onMessage(event) {
             var objEsp = JSON.parse(event.data)
@@ -105,7 +129,7 @@
 
         function onLoad() {
             initWebSocket();
-
+            onCloseRestoreConnection()
             if(getCookie("darkMode") == null) {
                 setCookie("darkMode", "true");
             }
@@ -234,6 +258,7 @@
         --toggleDM-transform: ;
         --transition-duration: 0ms;
         --margin: 15px;
+        --notification-margin: 40px;
         --cover-shadow-sideBar: ;
         --width-shadow: 0%;
     }
@@ -559,9 +584,28 @@
             /* Center the stupid thing: */
             margin-left: 200px;
             z-index: 2;
-            transform: translateX(-50%)
+            transform: translateX(-50%);
         }
-        
+        .notification {
+            align-items: center;
+            justify-content: center;
+            display:flex;
+            position: fixed;
+            background: var(--background-color);
+            color: var(--textColor);
+            box-shadow: var(--outdent-shadow);
+            transition: all var(--transition-duration);
+            transform: translateX(-50%) translateY(-50%);
+            z-index: 5;
+        }
+        #disconnectedMessage {
+            width: 350px;
+            height: 75px;
+            border-radius: 100px;
+            left: calc(calc(100% - 175px) - var(--notification-margin));
+            top: calc(calc(100% - calc(75px/2)) - var(--notification-margin));
+            transform: translateX(-50%)translateY(+180px);
+        }
         #valuePlace {
             grid-area: valuePlace;
         }
@@ -678,7 +722,7 @@
             onmouseup="$.post(serverIP + '/speed/' + this.value)" 
             ontouchend="$.post(serverIP + '/speed/' + this.value)" > <!-- onmouseup for desktop, ontouchend for mobile -->
         <output class="value-box" id="valueSpeed">1000</output>
-        
     </div>
+    <output class="notification" id="disconnectedMessage">Disconnected From Server</output>
 </body>
 </html>
