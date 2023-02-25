@@ -39,8 +39,9 @@
         async function onCloseRestoreConnection(){
             var i = 0;
             await sleep(1000);
-            document.querySelector('#disconnectedMessage').style.setProperty('transform', 'translateX(-50%)translateY(-50%)');
+            // document.querySelector('#disconnectedMessage').style.setProperty('transform', 'translateX(-50%)translateY(-50%)');
             while(websocketConnected == false) {
+                document.querySelector('#disconnectedMessage').style.setProperty('transform', 'translateX(-50%)translateY(-50%)');
                 if(i<20){
                     websocket = new WebSocket(gateway);
                     await sleep(1000)
@@ -105,13 +106,16 @@
         }
 
         async function moveSliderToPosition() {
+            moveToPosition = 50;
             percentPerSec = document.getElementById("valueSpeed").value/8000*100;
             console.log("percentPerSec: " + percentPerSec)
             console.log("document.getElementById(\"valueSpeed\"): " + document.getElementById("valueSpeed").value)
             var waitTimeSlider = 1000/percentPerSec;
             while(document.getElementById("sliderPlace").value != moveToPosition) {
                 if(moveToPosition > document.getElementById("sliderPlace").value){
-                    document.getElementById("sliderPlace").value += 1;
+                    console.log(document.getElementById("sliderPlace").value);
+                    document.getElementById("sliderPlace").value -= -1;
+                    console.log(document.getElementById("sliderPlace").value);
                     await sleep(waitTimeSlider);
                 }
                 else if(moveToPosition < document.getElementById("sliderPlace").value){
