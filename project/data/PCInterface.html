@@ -19,6 +19,7 @@
         var percentPerSec;
         var moveToPosition;
         var websocketConnected = false;
+        var demoMode;
         function initWebSocket() {
             console.log('Trying to open a WebSocket connection...');
             websocket = new WebSocket(gateway);
@@ -104,6 +105,34 @@
                 devMode = true;
             }
         }
+        async function demoModeToggle() {
+            if(demoMode == true) {
+                root.style.setProperty('--transition-duration', '0ms ease-in-out');
+                document.querySelector('#set-curr-pos-top-btn').style.setProperty('visibility', 'hidden');
+                document.querySelector('#set-curr-pos-max-btn').style.setProperty('visibility', 'hidden');
+                document.querySelector('#rmv-max-pos-lim-btn').style.setProperty('visibility', 'hidden');
+                document.querySelector('#set-curr-pos-top-btn').style.setProperty('position', 'absolute');
+                document.querySelector('#set-curr-pos-max-btn').style.setProperty('position', 'absolute');
+                document.querySelector('#rmv-max-pos-lim-btn').style.setProperty('position', 'absolute');
+                document.querySelector('.sidebarMenuInner li').style.setProperty('padding', '0px');
+                await sleep(10);
+                root.style.setProperty('--transition-duration', '250ms ease-in-out');
+                demoMode = false;
+            }
+            else {
+                root.style.setProperty('--transition-duration', '0ms ease-in-out');
+                document.querySelector('#set-curr-pos-top-btn').style.setProperty('visibility', '');
+                document.querySelector('#set-curr-pos-max-btn').style.setProperty('visibility', '');
+                document.querySelector('#rmv-max-pos-lim-btn').style.setProperty('visibility', '');
+                document.querySelector('#set-curr-pos-top-btn').style.setProperty('position', '');
+                document.querySelector('#set-curr-pos-max-btn').style.setProperty('position', '');
+                document.querySelector('#rmv-max-pos-lim-btn').style.setProperty('position', '');
+                document.querySelector('.sidebarMenuInner li').style.setProperty('padding', '18px');
+                await sleep(10);
+                root.style.setProperty('--transition-duration', '250ms ease-in-out');
+                demoMode = true;
+            }
+        }
 
         async function moveSliderToPosition() {
             moveToPosition = 50;
@@ -183,10 +212,12 @@
 
         function sideBarPopOut() {
             if(getCookie("sideBarOut") == "true") {
+                document.getElementById("openSidebarMenu").checked = true;
                 root.style.setProperty('--cover-shadow-sideBar', 'rgba(0,0,0,0.4)');
                 root.style.setProperty('--width-shadow', '100%');
             }
             else if(getCookie("sideBarOut") == "false"){
+                document.getElementById("openSidebarMenu").checked = false;
                 root.style.setProperty('--cover-shadow-sideBar', '');
                 root.style.setProperty('--width-shadow', '');
             }
@@ -214,17 +245,20 @@
                 root.style.setProperty('--toggleDM-transform', 'translateX(-100%)');
             }
             else if(getCookie("darkMode") == "false") {
-                root.style.setProperty('--color1', '#6DD3CE');
+                root.style.setProperty('--color1', '#6d49eb');
                 root.style.setProperty('--color2', '#C8E9A0');
                 root.style.setProperty('--color3', '#F7A278');
                 root.style.setProperty('--color4', '#A13D63');
                 root.style.setProperty('--color5', '#351E29');
                 root.style.setProperty('--textColor', '#242424');
-                root.style.setProperty('--background-color', '#F0F0F0');
+                root.style.setProperty('--background-color', '#f2effe');
                 root.style.setProperty('--outdent-shadow', '-5px -5px 8px rgba(255, 255, 255, 1), 5px 5px 8px rgba(0, 0, 0, 0.3), inset 2px 2px 0px rgba(255, 255, 255, 0), inset -2px -2px 0px rgba(0, 0, 0, 0)');
                 root.style.setProperty('--outdent-hover-shadow', '-8px -8px 8px rgba(255, 255, 255, 1), 8px 8px 10px rgba(0, 0, 0, 0.3)');
                 root.style.setProperty('--outdent-active-shadow', '-1px -1px 4px rgba(255, 255, 255, 0), 1px 1px 4px rgba(0, 0, 0, 0), inset -2px -2px 5px rgba(255, 255, 255, 1), inset 2px 2px 4px rgba(0, 0, 0, 0.3)');
-                root.style.setProperty('--indent-shadow', '1px 1px 4px rgba(255, 255, 255, 0), -1px -1px 4px rgba(0, 0, 0, 0), inset -4px -4px 6px rgba(255, 255, 255, 1), inset 4px 4px 6px rgba(0, 0, 0, 0.3)');
+                root.style.setProperty('--outdent-shadow2', '-5px -5px 8px rgba(255, 255, 255, 0.3), 5px 5px 8px rgba(0, 0, 0, 0.3), inset 2px 2px 0px rgba(255, 255, 255, 0), inset -2px -2px 0px rgba(0, 0, 0, 0)');
+                root.style.setProperty('--outdent-hover-shadow2', '-8px -8px 8px rgba(255, 255, 255, 0.3), 8px 8px 10px rgba(0, 0, 0, 0.3)');
+                root.style.setProperty('--outdent-active-shadow2', '-1px -1px 4px rgba(255, 255, 255, 0), 1px 1px 4px rgba(0, 0, 0, 0), inset -2px -2px 5px rgba(255, 255, 255, 0.3), inset 2px 2px 4px rgba(0, 0, 0, 0.3)');
+                root.style.setProperty('--indent-shadow', '1px 1px 4px rgba(255, 255, 255, 0), -1px -1px 4px rgba(0, 0, 0, 0), inset -4px -4px 6px rgba(255, 255, 255, 0.3), inset 4px 4px 6px rgba(0, 0, 0, 0.3)');
                 root.style.setProperty('--oliver-active-shadow', '-5px -5px 8px rgba(255, 255, 255, 1), 5px 5px 8px rgba(0, 0, 0, 0.3), inset -2px -2px 3px rgba(255, 255, 255, 1), inset 2px 2px 3px rgba(0, 0, 0, 0.3)');
                 root.style.setProperty('--slider-thumb-shadow', 'inset .4em .4em 5px -8px rgba(255, 255, 255, .5), inset -.4em -.4em 10px -3px rgba(0, 0, 0, 0.3), 0.7em 0.5em 7px -0.5em rgba(0, 0, 0, 0.3), -1px -1px 2px rgba(255, 255, 255, 0.8), 1px 1px 2px rgba(0, 0, 0, 0.3)');
                 root.style.setProperty('--toggleDM-gradient-color', 'linear-gradient(180deg,#ffcc89,#d8860b)');
@@ -251,6 +285,9 @@
         --outdent-hover-shadow: -8px -8px 8px rgba(255, 255, 255, 1), 8px 8px 10px rgba(0, 0, 0, 0.3);
         --outdent-active-shadow: -1px -1px 4px rgba(255, 255, 255, 0), 1px 1px 4px rgba(0, 0, 0, 0), inset -2px -2px 5px rgba(255, 255, 255, 1), inset 2px 2px 4px rgba(0, 0, 0, 0.3);
         --indent-shadow: 1px 1px 4px rgba(255, 255, 255, 0), -1px -1px 4px rgba(0, 0, 0, 0), inset -4px -4px 6px rgba(255, 255, 255, 1), inset 4px 4px 6px rgba(0, 0, 0, 0.3);
+        --outdent-shadow2: -5px -5px 8px rgba(255, 255, 255, 1), 5px 5px 8px rgba(0, 0, 0, 0.3), inset 2px 2px 0px rgba(255, 255, 255, 0), inset -2px -2px 0px rgba(0, 0, 0, 0);
+        --outdent-hover-shadow2: -8px -8px 8px rgba(255, 255, 255, 1), 8px 8px 10px rgba(0, 0, 0, 0.3);
+        --outdent-active-shadow2: -1px -1px 4px rgba(255, 255, 255, 0), 1px 1px 4px rgba(0, 0, 0, 0), inset -2px -2px 5px rgba(255, 255, 255, 1), inset 2px 2px 4px rgba(0, 0, 0, 0.3);
         /*--oliver-active-shadow: -5px -5px 8px rgba(255, 255, 255, 1), 5px 5px 8px rgba(0, 0, 0, 0.3), inset -2px -2px 3px rgba(255, 255, 255, 1), inset 2px 2px 3px rgba(0, 0, 0, 0.3);*/
         /* Round thumb: */
         --slider-thumb-shadow: inset .4em .4em 5px -8px rgba(255, 255, 255, .5), inset -.4em -.4em 10px -3px rgba(0, 0, 0, 0.3), 0.7em 0.5em 7px -0.5em rgba(0, 0, 0, 0.3), -1px -1px 2px rgba(255, 255, 255, 0.8), 1px 1px 2px rgba(0, 0, 0, 0.3); 
@@ -466,11 +503,33 @@
         }
     
         .button:active {
-            box-shadow: var(--oliver-active-shadow);
+            box-shadow: var(--outdent-active-shadow);
             border: 3px solid var(--background-color);
             padding-top: 2.5px; /* Shift text down */
         }
+        
+        .button2 {
+            background: var(--background-color);
+            color: var(--textColor);
+            border-radius: 9999px;
+            box-shadow: var(--outdent-shadow2); 
+            border: 0px solid var(--color1);
+            cursor: pointer;
+            transition: all var(--transition-duration);
+            font-size: 22px;
+            height: 50px;
+            padding: 0;
+            z-index: 2;
+        }
+        .button2:hover {
+            box-shadow: var(--outdent-hover-shadow2);
+        }
     
+        .button2:active {
+            box-shadow: var(--outdent-active-shadow2);
+            border: 3px solid var(--color1);
+            padding-top: 2.5px; /* Shift text down */
+        }
         /*Auto Button*/
         #auto-btn {
             grid-area: auto-btn;
@@ -682,17 +741,17 @@
 	            <label class="labelToggle" for="darkmode-toggle"></label>
             </li>
             <li>
-                <button class="button" id="set-curr-pos-top-btn" onclick="$.post(serverIP + '/set_current_position_as_top')">
+                <button class="button2" id="set-curr-pos-top-btn" onclick="$.post(serverIP + '/set_current_position_as_top')">
                     <span>Set Position as Top</span>
                 </button>
             </li>
             <li>
-                <button class="button" id="set-curr-pos-max-btn" onclick="$.post(serverIP + '/set_current_position_as_max')">
+                <button class="button2" id="set-curr-pos-max-btn" onclick="$.post(serverIP + '/set_current_position_as_max')">
                     <span>Set Position as Bottom</span>
                 </button>
             </li>
             <li>
-                <button class="button" id="rmv-max-pos-lim-btn" onclick="$.post(serverIP + '/remove_max_position_limit')">
+                <button class="button2" id="rmv-max-pos-lim-btn" onclick="$.post(serverIP + '/remove_max_position_limit')">
                     <span>Remove Bottom Limit</span>
                 </button>
             </li>
@@ -702,7 +761,7 @@
         </ul>
     </div>
     <div class="background" id="bckGrnd"></div>
-    <div class="background" id="coverShadow"></div>
+    <div class="background" id="coverShadow" onclick="sideBarToggle()"></div>
     <div class="control-ui">
         <button class="button" id="auto-btn" onclick="$.post(serverIP + '/auto')">
             <span>Auto</span>
@@ -713,7 +772,7 @@
         <button class="button" id="up-btn" onclick="$.post(serverIP + '/up')"> 
             <span>Up</span>
         </button>
-        <button class="button" id="test-btn" onclick="moveSliderToPosition()"> 
+        <button class="button" id="test-btn" onclick="demoModeToggle()"> 
             <span>Test</span>
         </button>
         <input type="range" id="sliderPlace"value="50" min="0" max="100" 
