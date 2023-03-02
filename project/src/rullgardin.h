@@ -6,12 +6,23 @@
 #include <AccelStepper.h>
 #include "multiLog.h"
 
-// Define stepper motor connections and motor interface type. Motor interface type must be set to 1 when using a driver:
-#define DIR_PIN 27
-#define STEP_PIN 26
-#define ENABLE_PIN 25
-#define RESET_PIN 33
-#define MOTOR_INTERFACE_TYPE 1
+// Define stepper motor connections and motor interface type. Select connection version here:
+// Possible values: CABLES, V1
+#define V1
+
+#if defined(CABLES)
+    #define DIR_PIN 27
+    #define STEP_PIN 26
+    #define ENABLE_PIN 25
+    #define RESET_PIN 33
+    #define MOTOR_INTERFACE_TYPE 1
+#elif defined(V1)
+    #define DIR_PIN 32
+    #define STEP_PIN 33
+    #define ENABLE_PIN 25
+    #define RESET_PIN 26
+    #define MOTOR_INTERFACE_TYPE 1
+#endif
 
 class Rullgardin {
 public:
