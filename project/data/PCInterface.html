@@ -138,6 +138,9 @@
             console.log("percentPerSec: " + percentPerSec)
             console.log("document.getElementById(\"valueSpeed\"): " + document.getElementById("valueSpeed").value)
             var waitTimeSlider = 1000/percentPerSec;
+            
+            await sleep(3 * (document.getElementById("valueSpeed").value / 800) * waitTimeSlider); // Wait a moment to compensate for communication delays and motor acceleration (at speed 800, delaying by 3x is good, at 1600 6x is good, 400 gives 1.5x...)
+            
             while(document.getElementById("sliderPlace").value != moveToPosition) {
                 if(moveToPosition > document.getElementById("sliderPlace").value){
                     console.log(document.getElementById("sliderPlace").value);
