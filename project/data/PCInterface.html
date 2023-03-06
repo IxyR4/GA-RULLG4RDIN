@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Smart Home</title>
+    <link rel="stylesheet" href="style.css" />
+    <link href='https://fonts.googleapis.com/css?family=Muli' rel='stylesheet' >
+    <link href='https://fonts.googleapis.com/css?family=Muli' rel='stylesheet' >
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js">/* Import Ajax, which allow for using $.post to send data to the ESP */</script> 
+    <script>
+        var serverIP = "http://" + "___serverip___"; // ___serverip___ gets replaced with ESP IP, by computer serving the webpage
+        var gateway = "ws://" + "___serverip___" + "/ws";
+        var websocket;
+        var devMode = false;
+        var root = document.querySelector(':root');
+        var speed;
+        var maxStep;
+        var percentPerSec;
+        var moveToPosition;
+        var websocketConnected = false;
+        var demoMode;
+        function initWebSocket() {
+            console.log('Trying to open a WebSocket connection...');
+            websocket = new WebSocket(gateway);
+            websocket.onopen    = onOpen;
+            websocket.onclose   = onClose;
+            websocket.onmessage = onMessage; // <-- add this line
+        }
+        function onOpen(event) {
+            websocketConnected = true;
+            console.log('Connection opened');
+        }
+        function onClose(event) {
+            websocketConnected = false;
+            console.log('Connection closed');
+            setTimeout(initWebSocket, 2000);
+            onCloseRestoreConnection();
+        }
+        async function onCloseRestoreConnection(){
+            var i = 0;
+            await sleep(1000);
+            // document.querySelector('#disconnectedMessage').style.setProperty('transform', 'translateX(-50%)translateY(-50%)');
+            while(websocketConnected == false) {
+                document.querySelector('#disconnectedMessage').style.setProperty('transform', 'translateX(-50%)translateY(-50%)');
+                if(i<20){
+                    websocket = new WebSocket(gateway);
+                    await sleep(1000)
+                    i++;
+                }
+                else
+                {
+                    websocket = new WebSocket(gateway);
+                    await sleep(10000)
+                }
+            }
+            await sleep(3000);
+            document.querySelector('#disconnectedMessage').style.setProperty('transform', 'translateX(-50%)translateY(+180px)');
+
+        }
+        function onMessage(event) {
+            var objEsp = JSON.parse(event.data)
+            if ("position" in objEsp) {
+                document.getElementById("valuePlace").value = objEsp.position;
+                document.getElementById("sliderPlace").value = objEsp.position;
+                moveToPosition = objEsp.position;
+            }
+            if ("speed" in objEsp) {
+                document.getElementById("valueSpeed").value = objEsp.speed;
+                document.getElementById("sliderSpeed").value = objEsp.speed;
+            }
+            if ("devMode" in objEsp) {
+                devMode = objEsp.devMode;
+            }
+            if ("maxSteps" in objEsp) {
+                maxStep = objEsp.maxSteps;
+            }
+            if ("movingTo" in objEsp) {
+                moveToPosition = objEsp.movingTo;
+                moveSliderToPosition();
+            }
+        }
+        
+        async function devModeToggle() {
+            if(devMode == true) {
+                root.style.setProperty('--transition-duration', '0ms ease-in-out');
+                document.querySelector('#sliderSpeed').style.setProperty('visibility', '');
+                document.querySelector('#valueSpeed').style.setProperty('visibility', '');
+                document.querySelector('#sliderSpeed').style.setProperty('position', '');
+                document.querySelector('#valueSpeed').style.setProperty('position', '');
+                document.querySelector('.control-ui').style.setProperty('grid-template', "'auto-btn auto-btn''down-btn up-btn''sliderPlace sliderPlace''valuePlace valuePlace''sliderSpeed sliderSpeed''valueSpeed valueSpeed''test-btn test-btn'");
+                await sleep(10);
+                root.style.setProperty('--transition-duration', '250ms ease-in-out');
+                devMode = false;
+            }
+            else {
+                root.style.setProperty('--transition-duration', '0ms ease-in-out');
+                document.querySelector('#sliderSpeed').style.setProperty('visibility', 'hidden');
+                document.querySelector('#valueSpeed').style.setProperty('visibility', 'hidden');
+                document.querySelector('#sliderSpeed').style.setProperty('position', 'absolute');
+                document.querySelector('#valueSpeed').style.setProperty('position', 'absolute');
+                document.querySelector('.control-ui').style.setProperty('grid-template', "'auto-btn auto-btn''down-btn up-btn''sliderPlace sliderPlace''valuePlace valuePlace''test-btn test-btn'");  
+                await sleep(10);
+                root.style.setProperty('--transition-duration', '250ms ease-in-out');
+                devMode = true;
+            }
+        }
+        async function demoModeToggle() {
+            if(demoMode == true) {
+                root.style.setProperty('--transition-duration', '0ms ease-in-out');
+                document.querySelector('#set-curr-pos-top-btn').style.setProperty('visibility', 'hidden');
+                document.querySelector('#set-curr-pos-max-btn').style.setProperty('visibility', 'hidden');
+                document.querySelector('#rmv-max-pos-lim-btn').style.setProperty('visibility', 'hidden');
+                document.querySelector('#set-curr-pos-top-btn').style.setProperty('position', 'absolute');
+                document.querySelector('#set-curr-pos-max-btn').style.setProperty('position', 'absolute');
+                document.querySelector('#rmv-max-pos-lim-btn').style.setProperty('position', 'absolute');
+                await sleep(10);
+                root.style.setProperty('--transition-duration', '250ms ease-in-out');
+                demoMode = false;
+            }
+            else {
+                root.style.setProperty('--transition-duration', '0ms ease-in-out');
+                document.querySelector('#set-curr-pos-top-btn').style.setProperty('visibility', '');
+                document.querySelector('#set-curr-pos-max-btn').style.setProperty('visibility', '');
+                document.querySelector('#rmv-max-pos-lim-btn').style.setProperty('visibility', '');
+                document.querySelector('#set-curr-pos-top-btn').style.setProperty('position', '');
+                document.querySelector('#set-curr-pos-max-btn').style.setProperty('position', '');
+                document.querySelector('#rmv-max-pos-lim-btn').style.setProperty('position', '');
+                await sleep(10);
+                root.style.setProperty('--transition-duration', '250ms ease-in-out');
+                demoMode = true;
+            }
+        }
+
+        async function moveSliderToPosition() {
+            moveToPosition = 50;
+            percentPerSec = document.getElementById("valueSpeed").value/8000*100;
+            console.log("percentPerSec: " + percentPerSec)
+            console.log("document.getElementById(\"valueSpeed\"): " + document.getElementById("valueSpeed").value)
+            var waitTimeSlider = 1000/percentPerSec;
+            
+            await sleep(3 * (document.getElementById("valueSpeed").value / 800) * waitTimeSlider); // Wait a moment to compensate for communication delays and motor acceleration (at speed 800, delaying by 3x is good, at 1600 6x is good, 400 gives 1.5x...)
+            
+            while(document.getElementById("sliderPlace").value != moveToPosition) {
+                if(moveToPosition > document.getElementById("sliderPlace").value){
+                    console.log(document.getElementById("sliderPlace").value);
+                    document.getElementById("sliderPlace").value -= -1;
+                    console.log(document.getElementById("sliderPlace").value);
+                    await sleep(waitTimeSlider);
+                }
+                else if(moveToPosition < document.getElementById("sliderPlace").value){
+                    document.getElementById("sliderPlace").value -= 1;
+                    await sleep(waitTimeSlider);
+                }
+                document.getElementById("valuePlace").value = document.getElementById("sliderPlace").value;
+            }
+        }
+        
+
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        function onLoad() {
+            initWebSocket();
+            onCloseRestoreConnection()
+            if(getCookie("darkMode") == null) {
+                setCookie("darkMode", "true");
+            }
+            if(getCookie("sideBarOut") == null) {
+                setCookie("sideBarOut", "false");
+            }
+            updatePageDarkMode();
+            sideBarPopOut();
+            if(getCookie("sideBarOut") == "true") {
+                document.getElementById("openSidebarMenu").checked = true;
+            }
+            document.getElementById("valuePlace").value = document.getElementById("sliderPlace").value;
+            document.getElementById("valueSpeed").value = document.getElementById("sliderSpeed").value;
+        }
+
+        function setCookie(key, value) {
+            var expires = new Date();
+            expires.setTime(expires.getTime() + (365 * 24 * 60 * 60 * 1000));
+            document.cookie = key + '=' + value + ';expires=' + expires.toUTCString();
+        }
+
+        function getCookie(key) {
+            var keyValue = document.cookie.match('(^|;) ?' + key + '=([^;]*)(;|$)');
+            return keyValue ? keyValue[2] : null;
+        }
+
+        function toggleDarkMode() {
+            if(getCookie("darkMode") == "false") {
+                setCookie("darkMode", "true")
+            } 
+            else {
+                setCookie("darkMode", "false")
+            }
+
+            updatePageDarkMode();
+        }
+
+        function sideBarToggle() {
+            if(getCookie("sideBarOut") == "false") {
+                setCookie("sideBarOut", "true")
+            } 
+            else {
+                setCookie("sideBarOut", "false")
+            }
+            sideBarPopOut();
+        }
+
+        function sideBarPopOut() {
+            if(getCookie("sideBarOut") == "true") {
+                document.getElementById("openSidebarMenu").checked = true;
+                root.style.setProperty('--cover-shadow-sideBar', 'rgba(0,0,0,0.4)');
+                root.style.setProperty('--width-shadow', '100%');
+            }
+            else if(getCookie("sideBarOut") == "false"){
+                document.getElementById("openSidebarMenu").checked = false;
+                root.style.setProperty('--cover-shadow-sideBar', '');
+                root.style.setProperty('--width-shadow', '');
+            }
+        }
+
+        async function updatePageDarkMode() {
+
+            if(getCookie("darkMode") == "true") {
+                root.style.setProperty('--color1', '#231b25');
+                root.style.setProperty('--color2', '#123059');
+                root.style.setProperty('--color3', '#123059');
+                root.style.setProperty('--color4', '#261627');
+                root.style.setProperty('--color5', '#242424');
+                root.style.setProperty('--textColor', '#F0F0F0');
+                root.style.setProperty('--background-color', '#261f27');
+                root.style.setProperty('--outdent-shadow', '-5px -5px 8px rgba(51, 51, 61, 1), 5px 5px 8px rgba(0, 0, 0, 0.3), inset 2px 2px 0px rgba(51, 51, 61, 0), inset -2px -2px 0px rgba(0, 0, 0, 0)');
+                root.style.setProperty('--outdent-shadow', '-5px -5px 8px rgba(51, 51, 61, 1), 5px 5px 8px rgba(0, 0, 0, 0.3), inset 2px 2px 0px rgba(51, 51, 61, 0), inset -2px -2px 0px rgba(0, 0, 0, 0)');
+                root.style.setProperty('--outdent-hover-shadow', '-8px -8px 8px rgba(51, 51, 61, 1), 8px 8px 10px rgba(0, 0, 0, 0.3)');
+                root.style.setProperty('--outdent-active-shadow', '-1px -1px 4px rgba(51, 51, 61, 0), 1px 1px 4px rgba(0, 0, 0, 0), inset -2px -2px 5px rgba(51, 51, 61, 1), inset 2px 2px 4px rgba(0, 0, 0, 0.3)');
+                root.style.setProperty('--outdent-shadow2', '-5px -5px 8px rgba(51, 51, 61, 1), 5px 5px 8px rgba(0, 0, 0, 0.3), inset 2px 2px 0px rgba(51, 51, 61, 0), inset -2px -2px 0px rgba(0, 0, 0, 0)');
+                root.style.setProperty('--outdent-hover-shadow2', '-8px -8px 8px rgba(51, 51, 61, 1), 8px 8px 10px rgba(0, 0, 0, 0.3)');
+                root.style.setProperty('--outdent-active-shadow2', '-1px -1px 4px rgba(51, 51, 61, 0), 1px 1px 4px rgba(0, 0, 0, 0), inset -2px -2px 5px rgba(51, 51, 61, 1), inset 2px 2px 4px rgba(0, 0, 0, 0.3)');
+                root.style.setProperty('--indent-shadow', '1px 1px 4px rgba(51, 51, 61, 0), -1px -1px 4px rgba(0, 0, 0, 0), inset -4px -4px 6px rgba(51, 51, 61, 1), inset 4px 4px 6px rgba(0, 0, 0, 0.3)');
+                root.style.setProperty('--oliver-active-shadow', '-5px -5px 8px rgba(51, 51, 61, 1), 5px 5px 8px rgba(0, 0, 0, 0.3), inset -2px -2px 3px rgba(51, 51, 61, 1), inset 2px 2px 3px rgba(0, 0, 0, 0.3)');
+                root.style.setProperty('--slider-thumb-shadow', 'inset .4em .4em 5px -8px rgba(51, 51, 61, 1), inset -.4em -.4em 10px -3px rgba(0, 0, 0, 0.3), 0.7em 0.5em 7px -0.5em rgba(0, 0, 0, 0.3), -1px -1px 2px rgba(51, 51, 61, 1), 1px 1px 2px rgba(0, 0, 0, 0.3)');
+                root.style.setProperty('--toggleDM-gradient-color', 'linear-gradient(180deg,#777,#3a3a3a)');
+                root.style.setProperty('--toggleDM-position-left', '206px');
+                root.style.setProperty('--toggleDM-transform', 'translateX(-100%)');
+            }
+            else if(getCookie("darkMode") == "false") {
+                root.style.setProperty('--color1', '#9e82ff');
+                root.style.setProperty('--color2', '#C8E9A0');
+                root.style.setProperty('--color3', '#F7A278');
+                root.style.setProperty('--color4', '#A13D63');
+                root.style.setProperty('--color5', '#351E29');
+                root.style.setProperty('--textColor', '#242424');
+                root.style.setProperty('--background-color', '#f2effe');
+                root.style.setProperty('--outdent-shadow', '-5px -5px 8px rgba(255, 255, 255, 1), 5px 5px 8px rgba(0, 0, 0, 0.3), inset 2px 2px 0px rgba(255, 255, 255, 0), inset -2px -2px 0px rgba(0, 0, 0, 0)');
+                root.style.setProperty('--outdent-hover-shadow', '-8px -8px 8px rgba(255, 255, 255, 1), 8px 8px 10px rgba(0, 0, 0, 0.3)');
+                root.style.setProperty('--outdent-active-shadow', '-1px -1px 4px rgba(255, 255, 255, 0), 1px 1px 4px rgba(0, 0, 0, 0), inset -2px -2px 5px rgba(255, 255, 255, 1), inset 2px 2px 4px rgba(0, 0, 0, 0.3)');
+                root.style.setProperty('--outdent-shadow2', '-5px -5px 8px rgba(255, 255, 255, 0.3), 5px 5px 8px rgba(0, 0, 0, 0.3), inset 2px 2px 0px rgba(255, 255, 255, 0), inset -2px -2px 0px rgba(0, 0, 0, 0)');
+                root.style.setProperty('--outdent-hover-shadow2', '-8px -8px 8px rgba(255, 255, 255, 0.3), 8px 8px 10px rgba(0, 0, 0, 0.3)');
+                root.style.setProperty('--outdent-active-shadow2', '-1px -1px 4px rgba(255, 255, 255, 0), 1px 1px 4px rgba(0, 0, 0, 0), inset -2px -2px 5px rgba(255, 255, 255, 0.3), inset 2px 2px 4px rgba(0, 0, 0, 0.3)');
+                root.style.setProperty('--indent-shadow', '1px 1px 4px rgba(255, 255, 255, 0), -1px -1px 4px rgba(0, 0, 0, 0), inset -4px -4px 6px rgba(255, 255, 255, 0.3), inset 4px 4px 6px rgba(0, 0, 0, 0.3)');
+                root.style.setProperty('--oliver-active-shadow', '-5px -5px 8px rgba(255, 255, 255, 1), 5px 5px 8px rgba(0, 0, 0, 0.3), inset -2px -2px 3px rgba(255, 255, 255, 1), inset 2px 2px 3px rgba(0, 0, 0, 0.3)');
+                root.style.setProperty('--slider-thumb-shadow', 'inset .4em .4em 5px -8px rgba(255, 255, 255, .5), inset -.4em -.4em 10px -3px rgba(0, 0, 0, 0.3), 0.7em 0.5em 7px -0.5em rgba(0, 0, 0, 0.3), -1px -1px 2px rgba(255, 255, 255, 0.8), 1px 1px 2px rgba(0, 0, 0, 0.3)');
+                root.style.setProperty('--toggleDM-gradient-color', 'linear-gradient(180deg,#ffcc89,#d8860b)');
+                root.style.setProperty('--toggleDM-position-left', '4px');
+                root.style.setProperty('--toggleDM-transform', '');
+            }
+            await sleep(10);
+            root.style.setProperty('--transition-duration', '250ms ease-in-out');
+        }
+        
+        
+    </script>
+    <style>
+   
+        /* Variables, they do exist */
+    :root {
+        --color1: #6DD3CE;
+        --color2: #C8E9A0;
+        --color3: #F7A278;
+        --color4: #A13D63;
+        --color5: #351E29;
+        --textColor: #242424;
+        --outdent-shadow: -5px -5px 8px rgba(255, 255, 255, 1), 5px 5px 8px rgba(0, 0, 0, 0.3), inset 2px 2px 0px rgba(255, 255, 255, 0), inset -2px -2px 0px rgba(0, 0, 0, 0);
+        --outdent-hover-shadow: -8px -8px 8px rgba(255, 255, 255, 1), 8px 8px 10px rgba(0, 0, 0, 0.3);
+        --outdent-active-shadow: -1px -1px 4px rgba(255, 255, 255, 0), 1px 1px 4px rgba(0, 0, 0, 0), inset -2px -2px 5px rgba(255, 255, 255, 1), inset 2px 2px 4px rgba(0, 0, 0, 0.3);
+        --indent-shadow: 1px 1px 4px rgba(255, 255, 255, 0), -1px -1px 4px rgba(0, 0, 0, 0), inset -4px -4px 6px rgba(255, 255, 255, 1), inset 4px 4px 6px rgba(0, 0, 0, 0.3);
+        --outdent-shadow2: -5px -5px 8px rgba(255, 255, 255, 1), 5px 5px 8px rgba(0, 0, 0, 0.3), inset 2px 2px 0px rgba(255, 255, 255, 0), inset -2px -2px 0px rgba(0, 0, 0, 0);
+        --outdent-hover-shadow2: -8px -8px 8px rgba(255, 255, 255, 1), 8px 8px 10px rgba(0, 0, 0, 0.3);
+        --outdent-active-shadow2: -1px -1px 4px rgba(255, 255, 255, 0), 1px 1px 4px rgba(0, 0, 0, 0), inset -2px -2px 5px rgba(255, 255, 255, 1), inset 2px 2px 4px rgba(0, 0, 0, 0.3);
+        /*--oliver-active-shadow: -5px -5px 8px rgba(255, 255, 255, 1), 5px 5px 8px rgba(0, 0, 0, 0.3), inset -2px -2px 3px rgba(255, 255, 255, 1), inset 2px 2px 3px rgba(0, 0, 0, 0.3);*/
+        /* Round thumb: */
+        --slider-thumb-shadow: inset .4em .4em 5px -8px rgba(255, 255, 255, .5), inset -.4em -.4em 10px -3px rgba(0, 0, 0, 0.3), 0.7em 0.5em 7px -0.5em rgba(0, 0, 0, 0.3), -1px -1px 2px rgba(255, 255, 255, 0.8), 1px 1px 2px rgba(0, 0, 0, 0.3); 
+        /* Flat thumb: */
+        /*--slider-thumb-shadow: -2px -2px 8px rgba(255, 255, 255, 0.5), 2px 2px 4px rgba(0, 0, 0, 0.4), inset 2px 2px 0px rgba(255, 255, 255, 0), inset -2px -2px 0px rgba(0, 0, 0, 0);*/
+        --background-color: #F0F0F0;
+        --toggleDM-gradient-color: linear-gradient(180deg,#ffcc89,#d8860b);
+        --toggleDM-position-left: 4px;
+        --toggleDM-transform: ;
+        --transition-duration: 0ms;
+        --margin: 15px;
+        --notification-margin: 40px;
+        --cover-shadow-sideBar: ;
+        --width-shadow: 0%;
+    }
+    body{
+        font-family: 'Muli';
+        font-size: 22px;
+        padding: 0 0;
+        margin: 0;
+        transition: var(--transition-duration);
+    }
+    .background {
+        transition: var(--transition-duration);
+        width:100%;
+		height: max(100%, 520px) ;
+		z-index: -1;
+		position: absolute;
+    }
+    #coverShadow {
+        background: var(--cover-shadow-sideBar);
+        width:var(--width-shadow);
+		z-index: 8;
+    }
+
+    #bckGrnd {
+        background: var(--background-color);
+    }
+    .header {
+        display: block;
+        transition: var(--transition-duration) ;
+        margin-bottom: -5px;
+        width: 100%;
+        max-width: 100%;
+        box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.4);
+        background-color: var(--color1);
+        position: fixed;
+        height: 60px!important;
+        overflow: hidden;
+        z-index: 9;
+    }
+    .main {
+        margin: 0 auto;
+        display: block;
+        height: 100%;
+        margin-top: 60px;
+    }
+    .mainInner{
+        display: table;
+        height: 100%;
+        width: 100%;
+        text-align: center;
+    }
+    .mainInner div{
+        display:table-cell;
+        vertical-align: middle;
+        font-weight: bold;
+        letter-spacing: 1.25px;
+    }
+    #sidebarMenu {
+        height: 100%;
+        z-index: 10;
+        position: fixed;
+        left: 0;
+        width: 250px;
+        margin-top: 60px;
+        transform: translateX(-250px);
+        transition: var(--transition-duration);
+        background: var(--color1);
+        box-shadow: var(--side-menu-left-shadow);
+    }
+    .sidebarMenuInner{
+        margin:0;
+        padding:0;
+        border-top: 1px solid rgba(255, 255, 255, 0.10);
+    }
+    .sidebarMenuInner li{
+        list-style: none;
+        color: #fff;
+        text-transform: uppercase;
+        font-weight: bold;
+        padding: 20px;
+        cursor: pointer;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.10);
+    }
+    .sidebarMenuInner li span{
+        display: block;
+        font-size: 18px;
+    }
+    .sidebarMenuInner li a{
+        color: #fff;
+        text-transform: uppercase;
+        font-weight: bold;
+        cursor: pointer;
+        text-decoration: none;
+    }
+    input[type="checkbox"]:checked ~ #sidebarMenu {
+        transform: translateX(0);
+    }
+
+    input[type=checkbox] {
+        transition: all var(--transition-duration);
+        box-sizing: border-box;
+        display: none;
+    }
+    .sidebarIconToggle {
+        transition: all var(--transition-duration);
+        box-sizing: border-box;
+        cursor: pointer;
+        position: fixed;
+        z-index: 99;
+        height: 100%;
+        width: 100%;
+        top: 22px;
+        left: 15px;
+        height: 20px;
+        width: 22px;
+    }
+    .spinner {
+        transition: all var(--transition-duration);
+        box-sizing: border-box;
+        position: absolute;
+        height: 3px;
+        width: 100%;
+        background-color: #fff;
+    }
+    .horizontal {
+        transition: all var(--transition-duration);
+        box-sizing: border-box;
+        position: relative;
+        float: left;
+        margin-top: 3px;
+    }
+    .diagonal.part-1 {
+        position: relative;
+        transition: all var(--transition-duration);
+        box-sizing: border-box;
+        float: left;
+    }
+    .diagonal.part-2 {
+        transition: all var(--transition-duration);
+        box-sizing: border-box;
+        position: relative;
+        float: left;
+        margin-top: 3px;
+    }
+    input[type=checkbox]:checked ~ .sidebarIconToggle > .horizontal {
+        transition: all var(--transition-duration);
+        box-sizing: border-box;
+        opacity: 0;
+    }
+    input[type=checkbox]:checked ~ .sidebarIconToggle > .diagonal.part-1 {
+        transition: all var(--transition-duration);
+        box-sizing: border-box;
+        transform: rotate(135deg);
+        margin-top: 8px;
+    }
+    input[type=checkbox]:checked ~ .sidebarIconToggle > .diagonal.part-2 {
+        transition: all var(--transition-duration);
+        box-sizing: border-box;
+        transform: rotate(-135deg);
+        margin-top: -9px;
+    }
+
+        .control-ui {
+            position: absolute;
+            margin-top: var(--margin)   ;
+            z-index: 2;
+            transition: var(--transition-duration);
+            left: 50%;
+            top: max(50%, 280px);
+            transform: translate(-50%, -50%);
+            height: fit-content;
+            width: min(400px, 100%);
+            /* border: 2px solid #001f3f; */
+            
+            /* Setup Grid */
+            display: grid;
+            grid-template:
+                'auto-btn auto-btn''down-btn up-btn''sliderPlace sliderPlace''valuePlace valuePlace''sliderSpeed sliderSpeed''valueSpeed valueSpeed''test-btn test-btn';
+            grid-gap: 15px;
+            grid-auto-columns: minmax(0, 1fr); /* Make columns equal size */
+        }
+    
+
+
+        /*Button Classification*/
+        .button {
+            background: var(--background-color);
+            color: var(--textColor);
+            border-radius: 9999px;
+            box-shadow: var(--outdent-shadow); 
+            border: 0px solid var(--background-color);
+            cursor: pointer;
+            transition: all var(--transition-duration);
+            font-size: 22px;
+            height: 50px;
+            padding: 0;
+            z-index: 2;
+        }
+        .button:hover {
+            box-shadow: var(--outdent-hover-shadow);
+        }
+    
+        .button:active {
+            box-shadow: var(--outdent-active-shadow);
+            border: 3px solid var(--background-color);
+            padding-top: 2.5px; /* Shift text down */
+        }
+        
+        .button2 {
+            background: var(--background-color);
+            color: var(--textColor);
+            border-radius: 9999px;
+            box-shadow: var(--outdent-shadow2); 
+            border: 0px solid var(--color1);
+            cursor: pointer;
+            transition: all var(--transition-duration);
+            font-size: 22px;
+            height: 50px;
+            padding: 0;
+            z-index: 2;
+        }
+        .button2:hover {
+            box-shadow: var(--outdent-hover-shadow2);
+        }
+    
+        .button2:active {
+            box-shadow: var(--outdent-active-shadow2);
+            border: 3px solid var(--color1);
+            padding-top: 2.5px; /* Shift text down */
+        }
+        /*Auto Button*/
+        #auto-btn {
+            grid-area: auto-btn;
+        }
+        #test-btn {
+            grid-area: test-btn;
+        }
+
+        /*Down Button*/
+        #down-btn {
+            grid-area: down-btn;
+        }
+
+        /*Up Button*/
+        #up-btn {
+            grid-area: up-btn;
+        }
+
+        #set-curr-pos-top-btn {
+            font-size: 16px;
+            height: 50px;
+            width: 210px;
+            background: var(--color1);
+        }
+
+        #set-curr-pos-max-btn {
+            font-size: 16px;
+            height: 50px;
+            width: 210px;
+            background: var(--color1);
+        }
+
+        #rmv-max-pos-lim-btn {
+            font-size: 22px;
+            height: 50px;
+            width: 210px;
+            background: var(--color1);
+        }
+    
+        input[type="range"] {
+            appearance: none;
+            width: calc(100% - 10px);
+            height: 40px;
+            background: var(--background-color);
+            border-radius: 9999px;
+            padding: 5px 5px;
+            margin: 0 0;
+            transition: all var(--transition-duration);
+            box-shadow: var(--indent-shadow);
+            grid-area: slider;
+        }
+
+        /* input[type="range"]:focus { */
+            /* To remove default (mostly blue) outline appplied by browsers on :focus */
+            /* outline: 0; */
+        /* } */
+
+        /* SLIDER THUMB */
+        /* Webkit based browsers (chrome, opera, ...) */
+        input[type="range"]::-webkit-slider-thumb {
+            appearance: none;
+            border: none;
+            width: 40px;
+            height: 40px;
+            background: transparent;
+            border-radius: 9999px;
+            transition: var(--transition-duration);
+            box-shadow: var(--slider-thumb-shadow);
+            cursor: pointer;
+        }
+
+        /*All the same stuff for Firefox */
+        input[type=range]::-moz-range-thumb {
+            appearance: none;
+            border: none;
+            width: 40px;
+            height: 100%;
+            background: transparent;
+            border-radius: 9999px;
+            transition: var(--transition-duration);
+            box-shadow: var(--slider-thumb-shadow);
+            cursor: pointer;
+        }
+
+        /* input[type="range"]::-webkit-slider-thumb:hover {
+            box-shadow: inset .4em .4em 5px -8px rgba(255, 255, 255, .5), inset -.4em -.4em 10px -3px rgba(0,0,0,.2), 0.7em 0.5em 7px -0.5em rgba(0,0,0,.4), -1px -1px 4px rgba(255, 255, 255, 0.6), 1px 1px 4px rgba(0, 0, 0, 0.8);
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            box-shadow: inset .4em .4em 5px -8px rgba(255, 255, 255, .5), inset -.4em -.4em 10px -3px rgba(0,0,0,.2), 0.7em 0.5em 7px -0.5em rgba(0,0,0,.4), -1px -1px 2px rgba(255, 255, 255, 0.8), 1px 1px 2px rgba(0, 0, 0, 0.9);
+        }
+
+        input[type="range"]::-webkit-slider-runnable-track:hover {
+            box-shadow: -5px -5px 8px rgba(255, 255, 255, 0.6), 5px 5px 10px rgba(0, 0, 0, 0.4), inset 2px -2px 5px rgba(255, 255, 255, 1), inset 2px 2px 4px rgba(0, 0, 0, 0.3);
+        } */
+        #sliderPlace {
+            grid-area: sliderPlace;
+        }
+        #sliderSpeed {
+            grid-area: sliderSpeed;
+
+        }
+        /*Range Value Label*/
+        .value-box {
+            display: grid;
+            align-items: center;
+            justify-content: center;
+            background: var(--background-color);
+            color: var(--textColor);
+            border-radius: 9999px;
+            box-shadow: var(--outdent-shadow);
+            transition: all var(--transition-duration);
+            width: calc(50% - var(--margin)/2);
+            height: 50px;
+            /* Center the stupid thing: */
+            margin-left: 200px;
+            z-index: 2;
+            transform: translateX(-50%);
+        }
+        .notification {
+            align-items: center;
+            justify-content: center;
+            display:flex;
+            position: fixed;
+            background: var(--background-color);
+            color: var(--textColor);
+            box-shadow: var(--outdent-shadow);
+            transition: all var(--transition-duration);
+            transform: translateX(-50%) translateY(-50%);
+            z-index: 5;
+        }
+        #disconnectedMessage {
+            width: 350px;
+            height: 75px;
+            border-radius: 100px;
+            left: calc(calc(100% - 175px) - var(--notification-margin));
+            top: calc(calc(100% - calc(75px/2)) - var(--notification-margin));
+            transform: translateX(-50%)translateY(+180px);
+        }
+        #valuePlace {
+            grid-area: valuePlace;
+        }
+        #valueSpeed {
+            grid-area: valueSpeed;
+        }
+
+        /* The toggle - the box around the slider */
+        .inputToggle[type='checkbox'] {
+            display: none;
+            box-shadow: var(--slider-thumb-shadow);
+        }
+
+        .labelToggle {
+            background: transparent;
+            border: 0px solid var(--textColor);
+            border-radius: 50px;
+            cursor: pointer;
+            display: block;
+            position: relative;
+            left: 50%;
+            transform: translateX(-50%);
+            transition: var(--transition-duration);
+            width: 210px;
+            height: 50px;
+            box-shadow: var(--indent-shadow);
+        }
+        
+        .labelToggle::after {
+        background: var(--toggleDM-gradient-color);
+        border-radius: 42px;
+        content: ' ';
+        cursor: pointer;
+        display: block;
+        position: absolute;
+        top:4px;
+		left:var(--toggleDM-position-left);
+        transform: var(--toggleDM-transform);
+        transition: var(--transition-duration);
+		width:42px;
+		height: 42px;
+        }
+        .inputToggle:checked + label {
+            background: transparent;
+        }
+        .inputToggle:checked + label::after {
+        left: var(--toggleDM-position-left);
+        transform: var(--toggleDM-transform);
+        background: var(--toggleDM-gradient-color);
+        }
+        .labelToggle:active:after{
+            width: 120px;
+        }
+        
+
+    </style>
+</head>
+<body onload="onLoad()">
+    <div class="header"></div>
+    <input type="checkbox" id="openSidebarMenu" onclick="sideBarToggle()">
+    <label for="openSidebarMenu" class="sidebarIconToggle">
+    <div class="spinner diagonal part-1"></div>
+    <div class="spinner horizontal"></div>
+    <div class="spinner diagonal part-2"></div>
+    </label>
+    <div id="sidebarMenu">
+        <ul class="sidebarMenuInner">
+            <li> 
+                <input class="inputToggle" type="checkbox" id="darkmode-toggle" onclick="toggleDarkMode()"/>
+	            <label class="labelToggle" for="darkmode-toggle"></label>
+            </li>
+            <li>
+                <button class="button2" id="set-curr-pos-top-btn" onclick="$.post(serverIP + '/set_current_position_as_top')">
+                    <span>Set Position as Top</span>
+                </button>
+            </li>
+            <li>
+                <button class="button2" id="set-curr-pos-max-btn" onclick="$.post(serverIP + '/set_current_position_as_max')">
+                    <span>Set Position as Bottom</span>
+                </button>
+            </li>
+            <li>
+                <button class="button2" id="rmv-max-pos-lim-btn" onclick="$.post(serverIP + '/remove_max_position_limit')">
+                    <span>Remove Bottom Limit</span>
+                </button>
+            </li>
+            <li>
+                <a href="https://www.linkedin.com/in/plavookac/" target="_blank">L</a>
+            </li>
+        </ul>
+    </div>
+    <div class="background" id="bckGrnd"></div>
+    <div class="background" id="coverShadow" onclick="sideBarToggle()"></div>
+    <div class="control-ui">
+        <button class="button" id="auto-btn" onclick="$.post(serverIP + '/auto')">
+            <span>Auto</span>
+        </button>
+        <button class="button" id="down-btn" onclick="$.post(serverIP + '/down')"> 
+            <span>Down</span>
+        </button>
+        <button class="button" id="up-btn" onclick="$.post(serverIP + '/up')"> 
+            <span>Up</span>
+        </button>
+        <button class="button" id="test-btn" onclick="demoModeToggle()"> 
+            <span>Test</span>
+        </button>
+        <input type="range" id="sliderPlace"value="50" min="0" max="100" 
+            oninput="this.nextElementSibling.value = this.value" 
+            onmouseup="$.post(serverIP + '/position/' + this.value)" 
+            ontouchend="$.post(serverIP + '/position/' + this.value)" > <!-- onmouseup for desktop, ontouchend for mobile -->
+        <output class="value-box" id="valuePlace">50</output>
+        <input type="range" id="sliderSpeed" value="800" min="0" max="2000" step="50" display="false"
+            oninput="this.nextElementSibling.value = this.value" 
+            onmouseup="$.post(serverIP + '/speed/' + this.value)" 
+            ontouchend="$.post(serverIP + '/speed/' + this.value)" > <!-- onmouseup for desktop, ontouchend for mobile -->
+        <output class="value-box" id="valueSpeed">1000</output>
+    </div>
+    <output class="notification" id="disconnectedMessage">Disconnected From Server</output>
+</body>
+</html>
